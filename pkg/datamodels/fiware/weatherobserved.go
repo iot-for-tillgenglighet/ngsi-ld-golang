@@ -7,8 +7,8 @@ import (
 //WeatherObserved is an observation of weather conditions at a certain place and time.
 type WeatherObserved struct {
 	ngsi.BaseEntity
-	DateCreated  ngsi.DateTimeProperty    `json:"dateCreated,omitempty"`
-	DateModified ngsi.DateTimeProperty    `json:"dateModified,omitempty"`
+	DateCreated  *ngsi.DateTimeProperty   `json:"dateCreated,omitempty"`
+	DateModified *ngsi.DateTimeProperty   `json:"dateModified,omitempty"`
 	DateObserved ngsi.DateTimeProperty    `json:"dateObserved"`
 	Location     ngsi.GeoJSONProperty     `json:"location"`
 	RefDevice    *ngsi.DeviceRelationship `json:"refDevice,omitempty"`
