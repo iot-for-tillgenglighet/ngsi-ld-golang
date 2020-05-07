@@ -1,5 +1,7 @@
 package types
 
+import "strconv"
+
 //BaseEntity contains the required base properties an Entity must have
 type BaseEntity struct {
 	ID      string   `json:"id"`
@@ -69,10 +71,32 @@ func NewNumberProperty(value float64) *NumberProperty {
 	}
 }
 
+func NewNumberPropertyFromInt(value int) *NumberProperty {
+	return &NumberProperty{
+		Property: Property{Type: "Property"},
+		Value:    float64(value),
+	}
+}
+
 //TextProperty stores values of type text
 type TextProperty struct {
 	Property
 	Value string `json:"value"`
+}
+
+func NewNumberPropertyFromString(value string) *NumberProperty {
+	number, _ := strconv.ParseFloat(value, 64)
+	return &NumberProperty{
+		Property: Property{Type: "Property"},
+		Value:    number,
+	}
+}
+
+func NewTextProperty(value string) *TextProperty {
+	return &TextProperty{
+		Property: Property{Type: "Property"},
+		Value:    value,
+	}
 }
 
 //Relationship is a base type for all types of relationships
