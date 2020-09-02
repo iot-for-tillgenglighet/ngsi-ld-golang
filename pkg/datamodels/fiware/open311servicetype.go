@@ -4,21 +4,21 @@ import (
 	ngsi "github.com/iot-for-tillgenglighet/ngsi-ld-golang/pkg/ngsi-ld/types"
 )
 
-//WeatherObserved is an observation of weather conditions at a certain place and time.
+//Open311ServiceType is a ...
 type Open311ServiceType struct {
 	ngsi.BaseEntity
-	description  ngsi.TextProperty   `json:"description"`
-	service_code ngsi.NumberProperty `json:"service_code"`
+	Description ngsi.TextProperty   `json:"description"`
+	ServiceCode ngsi.NumberProperty `json:"service_code"`
 }
 
-//NewWeatherObserved creates a new instance of WeatherObserved
+//NewOpen311ServiceType creates a new Open311ServiceType
 func NewOpen311ServiceType(label string, reportType string) *Open311ServiceType {
 
 	id := "urn:ngsi-ld:Open311ServiceType:" + label + ":" + reportType
 
 	return &Open311ServiceType{
-		description:  *ngsi.NewTextProperty(label),
-		service_code: *ngsi.NewNumberPropertyFromString(reportType),
+		Description: *ngsi.NewTextProperty(label),
+		ServiceCode: *ngsi.NewNumberPropertyFromString(reportType),
 		BaseEntity: ngsi.BaseEntity{
 			ID:   id,
 			Type: "Open311ServiceType",

@@ -4,6 +4,7 @@ import (
 	ngsi "github.com/iot-for-tillgenglighet/ngsi-ld-golang/pkg/ngsi-ld/types"
 )
 
+//Device is a Fiware entity
 type Device struct {
 	ngsi.BaseEntity
 	Value        *ngsi.TextProperty     `json:"value"`

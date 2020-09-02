@@ -4,24 +4,24 @@ import (
 	ngsi "github.com/iot-for-tillgenglighet/ngsi-ld-golang/pkg/ngsi-ld/types"
 )
 
-//WeatherObserved is an observation of weather conditions at a certain place and time.
+//Open311ServiceRequest is a ...
 type Open311ServiceRequest struct {
 	ngsi.BaseEntity
-	requested_datetime *ngsi.DateTimeProperty `json:"requested_datetime,omitempty"`
-	Location           ngsi.GeoJSONProperty   `json:"location"`
-	service_code       ngsi.NumberProperty    `json:"service_code"`
+	RequestedDateTime *ngsi.DateTimeProperty `json:"requested_datetime,omitempty"`
+	Location          ngsi.GeoJSONProperty   `json:"location"`
+	ServiceCode       ngsi.NumberProperty    `json:"service_code"`
 }
 
-//NewWeatherObserved creates a new instance of WeatherObserved
+//NewOpen311ServiceRequest creates a new service request
 func NewOpen311ServiceRequest(latitude float64, longitude float64, reportedType int, reportedTimestamp string) *Open311ServiceRequest {
 	dateTimeValue := ngsi.CreateDateTimeProperty(reportedTimestamp)
 
 	id := "urn:ngsi-ld:Open311ServiceRequest:" + reportedTimestamp
 
 	return &Open311ServiceRequest{
-		requested_datetime: dateTimeValue,
-		Location:           ngsi.CreateGeoJSONPropertyFromWGS84(latitude, longitude),
-		service_code:       *ngsi.NewNumberPropertyFromInt(reportedType),
+		RequestedDateTime: dateTimeValue,
+		Location:          ngsi.CreateGeoJSONPropertyFromWGS84(latitude, longitude),
+		ServiceCode:       *ngsi.NewNumberPropertyFromInt(reportedType),
 		BaseEntity: ngsi.BaseEntity{
 			ID:   id,
 			Type: "Open311ServiceRequest",
