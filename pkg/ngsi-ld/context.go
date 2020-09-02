@@ -3,6 +3,7 @@ package ngsi
 //ContextRegistry is where Context Sources register the information that they can provide
 type ContextRegistry interface {
 	GetContextSourcesForQuery(query Query) []ContextSource
+	GetContextSourcesForEntity(entityID string) []ContextSource
 
 	Register(source ContextSource)
 }
@@ -15,6 +16,19 @@ func NewContextRegistry() ContextRegistry {
 
 type registry struct {
 	sources []ContextSource
+}
+
+func (r *registry) GetContextSourcesForEntity(entityID string) []ContextSource {
+	matchingSources := []ContextSource{}
+
+	// TODO: Fix potential race issue
+	for _, src := range r.sources {
+		if src.ProvidesEntitiesWithMatchingID(entityID) {
+			matchingSources = append(matchingSources, src)
+		}
+	}
+
+	return matchingSources
 }
 
 func (r *registry) GetContextSourcesForQuery(query Query) []ContextSource {
@@ -48,7 +62,9 @@ func (r *registry) Register(source ContextSource) {
 //ContextSource provides query and subscription support for a set of entities
 type ContextSource interface {
 	ProvidesAttribute(attributeName string) bool
+	ProvidesEntitiesWithMatchingID(entityID string) bool
 	ProvidesType(typeName string) bool
 
 	GetEntities(query Query, callback QueryEntitiesCallback) error
+	UpdateEntityAttributes(entityID string, patch Patch) error
 }

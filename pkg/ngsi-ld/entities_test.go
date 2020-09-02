@@ -1,6 +1,8 @@
 package ngsi
 
 import (
+	"bytes"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -72,6 +74,23 @@ func TestGetEntitiesForDevice(t *testing.T) {
 	}
 }
 
+func TestUpdateEntitityAttributes(t *testing.T) {
+	deviceID := "urn:ngsi-ld:Device:mydevice"
+	jsonBytes, _ := json.Marshal(e("testvalue"))
+
+	req, _ := http.NewRequest("PATCH", createURL("/entities/"+deviceID+"/attrs/"), bytes.NewBuffer(jsonBytes))
+	w := httptest.NewRecorder()
+	contextRegistry := NewContextRegistry()
+	contextSource := newMockedContextSource("", "value")
+	contextRegistry.Register(contextSource)
+
+	NewUpdateEntityAttributesHandler(contextRegistry).ServeHTTP(w, req)
+
+	if contextSource.patchedEntity != deviceID {
+		t.Error("Patched entity did not match expectations. ", contextSource.patchedEntity, " != ", deviceID)
+	}
+}
+
 type mockEntity struct {
 	Value string
 }
@@ -94,6 +113,7 @@ type mockCtxSource struct {
 	entities      []Entity
 
 	queriedDevice string
+	patchedEntity string
 }
 
 func (s *mockCtxSource) GetEntities(q Query, cb QueryEntitiesCallback) error {
@@ -108,8 +128,18 @@ func (s *mockCtxSource) GetEntities(q Query, cb QueryEntitiesCallback) error {
 	return nil
 }
 
+func (s *mockCtxSource) UpdateEntityAttributes(entityID string, patch Patch) error {
+	s.patchedEntity = entityID
+	e := &mockEntity{}
+	return patch.DecodeBodyInto(e)
+}
+
 func (s *mockCtxSource) ProvidesAttribute(attributeName string) bool {
 	return s.attributeName == attributeName
+}
+
+func (s *mockCtxSource) ProvidesEntitiesWithMatchingID(entityID string) bool {
+	return true
 }
 
 func (s *mockCtxSource) ProvidesType(typeName string) bool {

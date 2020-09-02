@@ -69,3 +69,33 @@ func NewQueryEntitiesHandler(ctxReg ContextRegistry) http.HandlerFunc {
 		w.Write(bytes)
 	})
 }
+
+//NewUpdateEntityAttributesHandler handles PATCH requests for NGSI entitity attributes
+func NewUpdateEntityAttributesHandler(ctxReg ContextRegistry) http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		// TODO: Replace this string manipulation with a callback that can use the http router's
+		//		 functionality to extract URL params ...
+		entitiesIdx := strings.Index(r.URL.Path, "/entities/")
+		attrsIdx := strings.LastIndex(r.URL.Path, "/attrs/")
+
+		if entitiesIdx == -1 || attrsIdx == -1 || attrsIdx < entitiesIdx {
+			errors.ReportNewBadRequestData(
+				w,
+				"The supplied URL is invalid.",
+			)
+			return
+		}
+
+		entityID := r.URL.Path[entitiesIdx+10 : attrsIdx]
+
+		patch := newPatchFromParameters(r)
+		contextSources := ctxReg.GetContextSourcesForEntity(entityID)
+
+		for _, source := range contextSources {
+			source.UpdateEntityAttributes(entityID, patch)
+		}
+
+		w.WriteHeader(http.StatusNoContent)
+	})
+}

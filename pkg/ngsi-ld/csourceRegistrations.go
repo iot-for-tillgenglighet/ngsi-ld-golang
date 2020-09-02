@@ -124,8 +124,16 @@ func (rcs *remoteContextSource) GetEntities(query Query, callback QueryEntitiesC
 	return err
 }
 
+func (rcs *remoteContextSource) UpdateEntityAttributes(entityID string, patch Patch) error {
+	return nil
+}
+
 func (rcs *remoteContextSource) ProvidesAttribute(attributeName string) bool {
 	return rcs.registration.ProvidesAttribute(attributeName)
+}
+
+func (rcs *remoteContextSource) ProvidesEntitiesWithMatchingID(entityID string) bool {
+	return false
 }
 
 func (rcs *remoteContextSource) ProvidesType(typeName string) bool {
