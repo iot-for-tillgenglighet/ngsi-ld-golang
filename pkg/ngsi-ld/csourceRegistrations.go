@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"regexp"
 
 	"github.com/google/uuid"
 	"github.com/iot-for-tillgenglighet/ngsi-ld-golang/pkg/ngsi-ld/errors"
@@ -16,6 +17,7 @@ import (
 type CsourceRegistration interface {
 	Endpoint() string
 	ProvidesAttribute(attributeName string) bool
+	ProvidesEntitiesWithMatchingID(entityID string) bool
 	ProvidesType(typeName string) bool
 }
 
@@ -133,7 +135,7 @@ func (rcs *remoteContextSource) ProvidesAttribute(attributeName string) bool {
 }
 
 func (rcs *remoteContextSource) ProvidesEntitiesWithMatchingID(entityID string) bool {
-	return false
+	return rcs.registration.ProvidesEntitiesWithMatchingID(entityID)
 }
 
 func (rcs *remoteContextSource) ProvidesType(typeName string) bool {
@@ -161,6 +163,17 @@ func (csr *ctxSrcReg) ProvidesAttribute(attributeName string) bool {
 	return false
 }
 
+func (csr *ctxSrcReg) ProvidesEntitiesWithMatchingID(entityID string) bool {
+	for _, reginfo := range csr.Information {
+		for _, entity := range reginfo.Entities {
+			if entity.regexpForID != nil && entity.regexpForID.MatchString(entityID) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
 func (csr *ctxSrcReg) ProvidesType(typeName string) bool {
 	for _, reginfo := range csr.Information {
 		for _, entity := range reginfo.Entities {
@@ -173,6 +186,9 @@ func (csr *ctxSrcReg) ProvidesType(typeName string) bool {
 }
 
 type entityInfo struct {
+	IDPattern   *string `json:"idPattern,omitempty"`
+	regexpForID *regexp.Regexp
+
 	Type string `json:"type"`
 }
 
@@ -182,14 +198,22 @@ type ctxSrcRegInfo struct {
 }
 
 //NewCsourceRegistration creates and returns a concrete implementation of the CsourceRegistration interface
-func NewCsourceRegistration(entityTypeName string, attributeNames []string, endpoint string) CsourceRegistration {
+func NewCsourceRegistration(entityTypeName string, attributeNames []string, endpoint string, idpattern *string) (CsourceRegistration, error) {
 	regInfo := ctxSrcRegInfo{Entities: []entityInfo{}, Properties: attributeNames}
-	regInfo.Entities = append(regInfo.Entities, entityInfo{Type: entityTypeName})
+	einfo := &entityInfo{Type: entityTypeName, IDPattern: idpattern}
+	if idpattern != nil {
+		var err error
+		einfo.regexpForID, err = regexp.CompilePOSIX(*idpattern)
+		if err != nil {
+			return nil, err
+		}
+	}
+	regInfo.Entities = append(regInfo.Entities, *einfo)
 
 	reg := &ctxSrcReg{Type: "ContextSourceRegistration", Endpt: endpoint}
 	reg.Information = []ctxSrcRegInfo{regInfo}
 
-	return reg
+	return reg, nil
 }
 
 //NewCsourceRegistrationFromJSON unpacks a byte buffer into a CsourceRegistration and validates its contents
@@ -201,7 +225,22 @@ func NewCsourceRegistrationFromJSON(jsonBytes []byte) (CsourceRegistration, erro
 		return nil, err
 	}
 
-	// TODO: Validation ...
+	for infoIdx := range registration.Information {
+		info := &registration.Information[infoIdx]
+
+		for entityIdx := range info.Entities {
+			entity := &info.Entities[entityIdx]
+
+			if entity.IDPattern != nil {
+				entity.regexpForID, err = regexp.CompilePOSIX(*entity.IDPattern)
+				if err != nil {
+					return nil, err
+				}
+			}
+		}
+	}
+
+	// TODO: More validation ...
 
 	return registration, nil
 }

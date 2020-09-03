@@ -9,7 +9,7 @@ import (
 )
 
 func TestRegisterContextSource(t *testing.T) {
-	registrationBody := NewCsourceRegistration("Point", []string{"x", "y"}, "lolcathost")
+	registrationBody, _ := NewCsourceRegistration("Point", []string{"x", "y"}, "lolcathost", nil)
 	jsonBytes, _ := json.Marshal(registrationBody)
 	ctxRegistry := NewContextRegistry()
 	req, _ := http.NewRequest("POST", createURL("/csourceRegistration"), bytes.NewBuffer(jsonBytes))
@@ -30,12 +30,33 @@ func TestRegisterContextSource(t *testing.T) {
 	}
 }
 
+func TestRegisterContextSourceWithIDPatternMatch(t *testing.T) {
+	regex := "^urn:ngsi-ld:Device:.+"
+	registrationBody, _ := NewCsourceRegistration("A", []string{"a"}, "lolcathost", &regex)
+	jsonBytes, _ := json.Marshal(registrationBody)
+	ctxRegistry := NewContextRegistry()
+	req, _ := http.NewRequest("POST", createURL("/csourceRegistration"), bytes.NewBuffer(jsonBytes))
+	w := httptest.NewRecorder()
+
+	NewRegisterContextSourceHandler(ctxRegistry).ServeHTTP(w, req)
+
+	sources := ctxRegistry.GetContextSourcesForEntity("urn:ngsi-ld:Device:mydevice")
+
+	if len(sources) != 1 {
+		t.Error("The registered context source was not added to the registry.")
+	}
+
+	if w.Code != http.StatusCreated {
+		t.Error("Wrong status code returned. ", w.Code, " != expected 201")
+	}
+}
+
 func TestThatRequestsAreForwardedToRemoteContext(t *testing.T) {
 	mockService := setupMockServiceThatReturns(200, snowHeightResponseJSON)
 	defer mockService.Close()
 
 	remoteURL := mockService.URL
-	registrationBody := NewCsourceRegistration("WeatherObserved", []string{"snowHeight"}, remoteURL)
+	registrationBody, _ := NewCsourceRegistration("WeatherObserved", []string{"snowHeight"}, remoteURL, nil)
 	jsonBytes, _ := json.Marshal(registrationBody)
 	ctxRegistry := NewContextRegistry()
 
