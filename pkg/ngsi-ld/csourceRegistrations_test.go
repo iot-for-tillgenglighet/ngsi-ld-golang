@@ -51,6 +51,35 @@ func TestRegisterContextSourceWithIDPatternMatch(t *testing.T) {
 	}
 }
 
+func TestThatRequestsWithIDPatternMatchAreForwardedToRemoteContext(t *testing.T) {
+	mockService := setupMockServiceThatReturns(204, "")
+	defer mockService.Close()
+
+	remoteURL := mockService.URL
+	regex := "urn:ngsi-ld:TypeA:.+"
+	registrationBody, _ := NewCsourceRegistration("TypeA", []string{"a"}, remoteURL, &regex)
+	jsonBytes, _ := json.Marshal(registrationBody)
+	ctxRegistry := NewContextRegistry()
+
+	// Send a POST request to register a remote context source
+	req, _ := http.NewRequest("POST", createURL("/csourceRegistration"), bytes.NewBuffer(jsonBytes))
+	w := httptest.NewRecorder()
+	NewRegisterContextSourceHandler(ctxRegistry).ServeHTTP(w, req)
+
+	// Send a PATCH request to update entity attributes (that are handled by the "remote" source)
+	entityID := "urn:ngsi-ld:TypeA:myentity"
+	req, _ = http.NewRequest("PATCH", "https://localhost/ngsi-ld/v1/entities/"+entityID+"/attrs/", nil)
+	patch := newPatchFromParameters(req)
+	sources := ctxRegistry.GetContextSourcesForEntity(entityID)
+
+	for _, src := range sources {
+		err := src.UpdateEntityAttributes(entityID, patch)
+		if err != nil {
+			t.Error("Failed with unexpected error", err.Error())
+			return
+		}
+	}
+}
 func TestThatRequestsAreForwardedToRemoteContext(t *testing.T) {
 	mockService := setupMockServiceThatReturns(200, snowHeightResponseJSON)
 	defer mockService.Close()

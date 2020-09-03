@@ -127,7 +127,30 @@ func (rcs *remoteContextSource) GetEntities(query Query, callback QueryEntitiesC
 }
 
 func (rcs *remoteContextSource) UpdateEntityAttributes(entityID string, patch Patch) error {
-	return nil
+	u, err := url.Parse(rcs.registration.Endpoint())
+	req := patch.Request()
+
+	req.URL.Host = u.Host
+	req.URL.Scheme = u.Scheme
+
+	forwardedHost := req.Header.Get("Host")
+	if forwardedHost != "" {
+		req.Header.Set("X-Forwarded-Host", forwardedHost)
+	}
+	req.Host = u.Host
+
+	// Change the User-Agent header to something more appropriate
+	req.Header.Add("User-Agent", "ngsi-context-broker/0.1")
+
+	fmt.Println("Forwarding request to: " + req.URL.String())
+	b, _ := httputil.DumpRequestOut(req, false)
+	fmt.Println(string(b))
+
+	response := &remoteResponse{}
+	proxy := httputil.NewSingleHostReverseProxy(u)
+	proxy.ServeHTTP(response, req)
+
+	return err
 }
 
 func (rcs *remoteContextSource) ProvidesAttribute(attributeName string) bool {
