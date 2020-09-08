@@ -143,7 +143,7 @@ func (rcs *remoteContextSource) UpdateEntityAttributes(entityID string, patch Pa
 	req.Header.Add("User-Agent", "ngsi-context-broker/0.1")
 
 	fmt.Println("Forwarding request to: " + req.URL.String())
-	b, _ := httputil.DumpRequestOut(req, false)
+	b, _ := httputil.DumpRequestOut(req, true)
 	fmt.Println(string(b))
 
 	response := &remoteResponse{}
