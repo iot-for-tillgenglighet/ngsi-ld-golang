@@ -1,6 +1,8 @@
 package fiware
 
 import (
+	"strings"
+
 	ngsi "github.com/iot-for-tillgenglighet/ngsi-ld-golang/pkg/ngsi-ld/types"
 )
 
@@ -14,7 +16,9 @@ type Device struct {
 
 //NewDevice creates a new Device from given ID and Value
 func NewDevice(id string, value string) *Device {
-	id = "urn:ngsi-ld:Device:" + id
+	if strings.HasPrefix(id, "urn:ngsi-ld:Device:") == false {
+		id = "urn:ngsi-ld:Device:" + id
+	}
 
 	return &Device{
 		Value: ngsi.NewTextProperty(value),
