@@ -92,8 +92,17 @@ func NewUpdateEntityAttributesHandler(ctxReg ContextRegistry) http.HandlerFunc {
 		patch := newPatchFromParameters(r)
 		contextSources := ctxReg.GetContextSourcesForEntity(entityID)
 
+		if len(contextSources) == 0 {
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+
 		for _, source := range contextSources {
-			source.UpdateEntityAttributes(entityID, patch)
+			err := source.UpdateEntityAttributes(entityID, patch)
+			if err != nil {
+				errors.ReportNewInvalidRequest(w, "Unable to update entity attributes: "+err.Error())
+				return
+			}
 		}
 
 		w.WriteHeader(http.StatusNoContent)
