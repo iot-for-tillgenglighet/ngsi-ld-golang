@@ -1,6 +1,9 @@
 package types
 
-import "strconv"
+import (
+	"strconv"
+	"strings"
+)
 
 //BaseEntity contains the required base properties an Entity must have
 type BaseEntity struct {
@@ -71,6 +74,7 @@ func NewNumberProperty(value float64) *NumberProperty {
 	}
 }
 
+//NewNumberPropertyFromInt accepts a value as an int and returns a new NumberProperty
 func NewNumberPropertyFromInt(value int) *NumberProperty {
 	return &NumberProperty{
 		Property: Property{Type: "Property"},
@@ -84,6 +88,7 @@ type TextProperty struct {
 	Value string `json:"value"`
 }
 
+//NewNumberPropertyFromString accepts a value as a string and returns a new NumberProperty
 func NewNumberPropertyFromString(value string) *NumberProperty {
 	number, _ := strconv.ParseFloat(value, 64)
 	return &NumberProperty{
@@ -92,6 +97,7 @@ func NewNumberPropertyFromString(value string) *NumberProperty {
 	}
 }
 
+//NewTextProperty accepts a value as a string and returns a new TextProperty
 func NewTextProperty(value string) *TextProperty {
 	return &TextProperty{
 		Property: Property{Type: "Property"},
@@ -116,8 +122,19 @@ func CreateDeviceRelationshipFromDevice(device string) *DeviceRelationship {
 		return nil
 	}
 
+	const deviceIDPrefix = "urn:ngsi-ld:Device:"
+	if strings.HasPrefix(device, deviceIDPrefix) == false {
+		device = deviceIDPrefix + device
+	}
+
 	return &DeviceRelationship{
 		Relationship: Relationship{Type: "Relationship"},
-		Object:       "urn:ngsi-ld:Device:" + device,
+		Object:       device,
 	}
+}
+
+//PointOfInterestRelationship stores information about an entity's relation to a certain PointOfInterest
+type PointOfInterestRelationship struct {
+	Relationship
+	Object string `json:"object"`
 }
