@@ -2,10 +2,12 @@ package ngsi
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"net/http"
 	"strings"
 
 	"github.com/iot-for-tillgenglighet/ngsi-ld-golang/pkg/ngsi-ld/errors"
+	"github.com/iot-for-tillgenglighet/ngsi-ld-golang/pkg/ngsi-ld/types"
 )
 
 //Entity is an informational representative of something that is supposed to exist in the real world, physically or conceptually
@@ -106,5 +108,27 @@ func NewUpdateEntityAttributesHandler(ctxReg ContextRegistry) http.HandlerFunc {
 		}
 
 		w.WriteHeader(http.StatusNoContent)
+	})
+}
+
+//NewCreateEntityHandler handles incoming POST requests for NGSI entities
+func NewCreateEntityHandler(ctxReg ContextRegistry) http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		body, _ := ioutil.ReadAll(r.Body)
+		entity := &types.BaseEntity{}
+		_ = json.Unmarshal(body, entity)
+
+		contextSources := ctxReg.GetContextSourcesForEntityType(entity.Type)
+
+		if len(contextSources) == 0 {
+			errors.ReportNewInvalidRequest(w, "No context sources matching CreateEntity type")
+			return
+		}
+
+		for _, source := range contextSources {
+			err := source.CreateEntity()
+		}
+
+		w.WriteHeader(http.StatusCreated)
 	})
 }

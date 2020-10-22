@@ -8,6 +8,8 @@ import (
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/iot-for-tillgenglighet/ngsi-ld-golang/pkg/datamodels/fiware"
 )
 
 func createURL(path string, params ...string) string {
@@ -28,6 +30,37 @@ func createURL(path string, params ...string) string {
 
 func TestMain(m *testing.M) {
 	os.Exit(m.Run())
+}
+
+func TestCreateEntity(t *testing.T) {
+	device := fiware.NewDevice("urn:ngsi-ld:Device:livboj", "on")
+	jsonBytes, _ := json.Marshal(device)
+	req, _ := http.NewRequest("POST", createURL("/entities"), bytes.NewBuffer(jsonBytes))
+	w := httptest.NewRecorder()
+
+	source := newMockedContextSource("Device", "value")
+
+	contextRegistry := NewContextRegistry()
+	contextRegistry.Register(source)
+
+	NewCreateEntityHandler(contextRegistry).ServeHTTP(w, req)
+
+	if w.Code != http.StatusCreated {
+		t.Error("Test failed.")
+	}
+}
+
+func TestCreateEntityFailsWithNoContextSources(t *testing.T) {
+	device := fiware.NewDevice("urn:ngsi-ld:Device:livboj", "on")
+	jsonBytes, _ := json.Marshal(device)
+	req, _ := http.NewRequest("POST", createURL("/entities"), bytes.NewBuffer(jsonBytes))
+	w := httptest.NewRecorder()
+
+	NewCreateEntityHandler(NewContextRegistry()).ServeHTTP(w, req)
+
+	if w.Code != http.StatusBadRequest {
+		t.Error("Wrong response code when posting device with no context sources. ", w.Code, " is not ", http.StatusBadRequest)
+	}
 }
 
 func TestGetEntitiesWithoutAttributesOrTypesFails(t *testing.T) {

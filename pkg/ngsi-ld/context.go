@@ -4,6 +4,7 @@ package ngsi
 type ContextRegistry interface {
 	GetContextSourcesForQuery(query Query) []ContextSource
 	GetContextSourcesForEntity(entityID string) []ContextSource
+	GetContextSourcesForEntityType(entityType string) []ContextSource
 
 	Register(source ContextSource)
 }
@@ -24,6 +25,19 @@ func (r *registry) GetContextSourcesForEntity(entityID string) []ContextSource {
 	// TODO: Fix potential race issue
 	for _, src := range r.sources {
 		if src.ProvidesEntitiesWithMatchingID(entityID) {
+			matchingSources = append(matchingSources, src)
+		}
+	}
+
+	return matchingSources
+}
+
+func (r *registry) GetContextSourcesForEntityType(entityType string) []ContextSource {
+	matchingSources := []ContextSource{}
+
+	// TODO: Fix potential race issue
+	for _, src := range r.sources {
+		if src.ProvidesType(entityType) {
 			matchingSources = append(matchingSources, src)
 		}
 	}
@@ -65,6 +79,7 @@ type ContextSource interface {
 	ProvidesEntitiesWithMatchingID(entityID string) bool
 	ProvidesType(typeName string) bool
 
+	CreateEntity(request Post) error
 	GetEntities(query Query, callback QueryEntitiesCallback) error
 	UpdateEntityAttributes(entityID string, patch Patch) error
 }
