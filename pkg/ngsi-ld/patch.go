@@ -1,8 +1,10 @@
 package ngsi
 
 import (
+	"bytes"
 	"encoding/json"
 	"io"
+	"io/ioutil"
 	"net/http"
 )
 
@@ -27,7 +29,14 @@ func (p *patchWrapper) Request() *http.Request {
 }
 
 func (p *patchWrapper) BodyReader() io.Reader {
-	return p.Request().Body
+	req := p.Request()
+
+	// Request bodies can only be read once, so read the request's body ...
+	buf, _ := ioutil.ReadAll(req.Body)
+	// ... and replace it with a new reader with the same contents ...
+	req.Body = ioutil.NopCloser(bytes.NewBuffer(buf))
+	// ... before returning yet another new reader to the caller
+	return ioutil.NopCloser(bytes.NewBuffer(buf))
 }
 
 func (p *patchWrapper) DecodeBodyInto(v interface{}) error {

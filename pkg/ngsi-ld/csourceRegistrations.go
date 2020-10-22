@@ -81,6 +81,37 @@ type remoteContextSource struct {
 	registration CsourceRegistration
 }
 
+func (rcs *remoteContextSource) CreateEntity(typeName, entityID string, post Post) error {
+	u, _ := url.Parse(rcs.registration.Endpoint())
+	req := post.Request()
+
+	req.URL.Host = u.Host
+	req.URL.Scheme = u.Scheme
+
+	forwardedHost := req.Header.Get("Host")
+	if forwardedHost != "" {
+		req.Header.Set("X-Forwarded-Host", forwardedHost)
+	}
+	req.Host = u.Host
+
+	// Change the User-Agent header to something more appropriate
+	req.Header.Add("User-Agent", "ngsi-context-broker/0.1")
+
+	fmt.Println("Forwarding request to: " + req.URL.String())
+	b, _ := httputil.DumpRequestOut(req, false)
+	fmt.Println(string(b))
+
+	response := &remoteResponse{}
+	proxy := httputil.NewSingleHostReverseProxy(u)
+	proxy.ServeHTTP(response, req)
+
+	if response.responseCode != http.StatusCreated {
+		return fmt.Errorf("Attempt to create %s entity failed with status code %d", typeName, response.responseCode)
+	}
+
+	return nil
+}
+
 func (rcs *remoteContextSource) GetEntities(query Query, callback QueryEntitiesCallback) error {
 	u, err := url.Parse(rcs.registration.Endpoint())
 	req := query.Request()
@@ -114,7 +145,7 @@ func (rcs *remoteContextSource) GetEntities(query Query, callback QueryEntitiesC
 	// and iterate over the array to pass the individual entitites
 	// to the supplied callback. This will of course fail if the response
 	// payload is not an array, but that is an assignment for another day...
-	if response.responseCode == 200 {
+	if response.responseCode == http.StatusOK {
 		err = json.Unmarshal(response.bytes, &unmarshaledResponse)
 		if err == nil {
 			for _, e := range unmarshaledResponse {

@@ -2,7 +2,6 @@ package ngsi
 
 import (
 	"encoding/json"
-	"io/ioutil"
 	"net/http"
 	"strings"
 
@@ -114,19 +113,24 @@ func NewUpdateEntityAttributesHandler(ctxReg ContextRegistry) http.HandlerFunc {
 //NewCreateEntityHandler handles incoming POST requests for NGSI entities
 func NewCreateEntityHandler(ctxReg ContextRegistry) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		body, _ := ioutil.ReadAll(r.Body)
+		request := newPostFromParameters(r)
+
 		entity := &types.BaseEntity{}
-		_ = json.Unmarshal(body, entity)
+		request.DecodeBodyInto(entity)
 
 		contextSources := ctxReg.GetContextSourcesForEntityType(entity.Type)
 
 		if len(contextSources) == 0 {
-			errors.ReportNewInvalidRequest(w, "No context sources matching CreateEntity type")
+			errors.ReportNewInvalidRequest(w, "No context sources found matching the provided type")
 			return
 		}
 
 		for _, source := range contextSources {
-			err := source.CreateEntity()
+			err := source.CreateEntity(entity.Type, entity.ID, request)
+			if err != nil {
+				errors.ReportNewInvalidRequest(w, "Failed to create entity: "+err.Error())
+				return
+			}
 		}
 
 		w.WriteHeader(http.StatusCreated)

@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/iot-for-tillgenglighet/ngsi-ld-golang/pkg/datamodels/fiware"
+	"github.com/iot-for-tillgenglighet/ngsi-ld-golang/pkg/ngsi-ld/types"
 )
 
 func createURL(path string, params ...string) string {
@@ -32,21 +33,30 @@ func TestMain(m *testing.M) {
 	os.Exit(m.Run())
 }
 
-func TestCreateEntity(t *testing.T) {
-	device := fiware.NewDevice("urn:ngsi-ld:Device:livboj", "on")
+func TestCreateEntityUsesCorrectTypeAndID(t *testing.T) {
+	entityID := "urn:ngsi-ld:Device:livboj"
+	device := fiware.NewDevice(entityID, "")
 	jsonBytes, _ := json.Marshal(device)
 	req, _ := http.NewRequest("POST", createURL("/entities"), bytes.NewBuffer(jsonBytes))
 	w := httptest.NewRecorder()
 
-	source := newMockedContextSource("Device", "value")
-
 	contextRegistry := NewContextRegistry()
-	contextRegistry.Register(source)
+	typeName := "Device"
+	contextSource := newMockedContextSource(typeName, "")
+	contextRegistry.Register(contextSource)
 
 	NewCreateEntityHandler(contextRegistry).ServeHTTP(w, req)
 
 	if w.Code != http.StatusCreated {
-		t.Error("Test failed.")
+		t.Error("Handler did not return the expected status code. ", w.Code, " != ", http.StatusCreated)
+	}
+
+	if contextSource.createdEntityType != typeName {
+		t.Error("CreateEntity called with wrong type name. ", contextSource.createdEntityType, " != ", typeName)
+	}
+
+	if contextSource.createdEntity != entityID {
+		t.Error("CreateEntity called with wrong entity ID. ", contextSource.createdEntity, " != ", entityID)
 	}
 }
 
@@ -145,8 +155,18 @@ type mockCtxSource struct {
 	attributeName string
 	entities      []Entity
 
-	queriedDevice string
-	patchedEntity string
+	queriedDevice     string
+	createdEntity     string
+	createdEntityType string
+	patchedEntity     string
+}
+
+func (s *mockCtxSource) CreateEntity(typeName, entityID string, post Post) error {
+	s.createdEntity = entityID
+	s.createdEntityType = typeName
+
+	entity := &types.BaseEntity{}
+	return post.DecodeBodyInto(entity)
 }
 
 func (s *mockCtxSource) GetEntities(q Query, cb QueryEntitiesCallback) error {
