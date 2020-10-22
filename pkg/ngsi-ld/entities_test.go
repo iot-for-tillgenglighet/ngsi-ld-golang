@@ -3,11 +3,16 @@ package ngsi
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/iot-for-tillgenglighet/ngsi-ld-golang/pkg/datamodels/fiware"
+	"github.com/iot-for-tillgenglighet/ngsi-ld-golang/pkg/ngsi-ld/types"
 )
 
 func createURL(path string, params ...string) string {
@@ -28,6 +33,56 @@ func createURL(path string, params ...string) string {
 
 func TestMain(m *testing.M) {
 	os.Exit(m.Run())
+}
+
+func TestCreateEntityUsesCorrectTypeAndID(t *testing.T) {
+	entityID := "urn:ngsi-ld:Device:livboj"
+	byteReader, typeName := newEntityAsByteBuffer(entityID)
+	req, _ := http.NewRequest("POST", createURL("/entities"), byteReader)
+	w := httptest.NewRecorder()
+
+	ctxReg, ctxSrc := newContextRegistryWithSourceForType(typeName)
+
+	NewCreateEntityHandler(ctxReg).ServeHTTP(w, req)
+
+	if w.Code != http.StatusCreated {
+		t.Error("Handler did not return the expected status code. ", w.Code, " != ", http.StatusCreated)
+	}
+
+	if ctxSrc.createdEntityType != typeName {
+		t.Error("CreateEntity called with wrong type name. ", ctxSrc.createdEntityType, " != ", typeName)
+	}
+
+	if ctxSrc.createdEntity != entityID {
+		t.Error("CreateEntity called with wrong entity ID. ", ctxSrc.createdEntity, " != ", entityID)
+	}
+}
+
+func TestCreateEntityFailsWithNoContextSources(t *testing.T) {
+	byteBuffer, _ := newEntityAsByteBuffer("id")
+	req, _ := http.NewRequest("POST", createURL("/entities"), byteBuffer)
+	w := httptest.NewRecorder()
+
+	NewCreateEntityHandler(NewContextRegistry()).ServeHTTP(w, req)
+
+	if w.Code != http.StatusBadRequest {
+		t.Error("Wrong response code when posting device with no context sources. ", w.Code, " is not ", http.StatusBadRequest)
+	}
+}
+
+func TestCreateEntityHandlesFailureFromContextSource(t *testing.T) {
+	byteBuffer, typeName := newEntityAsByteBuffer("id")
+	req, _ := http.NewRequest("POST", createURL("/entities"), byteBuffer)
+	w := httptest.NewRecorder()
+
+	ctxReg, ctxSrc := newContextRegistryWithSourceForType(typeName)
+	ctxSrc.createEntityShouldFailWithError = errors.New("failure")
+
+	NewCreateEntityHandler(ctxReg).ServeHTTP(w, req)
+
+	if w.Code != http.StatusBadRequest {
+		t.Error("Wrong response code when posting device with no context sources. ", w.Code, " is not ", http.StatusBadRequest)
+	}
 }
 
 func TestGetEntitiesWithoutAttributesOrTypesFails(t *testing.T) {
@@ -99,6 +154,19 @@ func e(val string) mockEntity {
 	return mockEntity{Value: val}
 }
 
+func newContextRegistryWithSourceForType(typeName string) (ContextRegistry, *mockCtxSource) {
+	contextRegistry := NewContextRegistry()
+	contextSource := newMockedContextSource(typeName, "")
+	contextRegistry.Register(contextSource)
+	return contextRegistry, contextSource
+}
+
+func newEntityAsByteBuffer(entityID string) (io.Reader, string) {
+	device := fiware.NewDevice(entityID, "")
+	jsonBytes, _ := json.Marshal(device)
+	return bytes.NewBuffer(jsonBytes), device.Type
+}
+
 func newMockedContextSource(typeName string, attributeName string, e ...mockEntity) *mockCtxSource {
 	source := &mockCtxSource{typeName: typeName, attributeName: attributeName}
 	for _, entity := range e {
@@ -112,8 +180,24 @@ type mockCtxSource struct {
 	attributeName string
 	entities      []Entity
 
-	queriedDevice string
-	patchedEntity string
+	createEntityShouldFailWithError error
+
+	queriedDevice     string
+	createdEntity     string
+	createdEntityType string
+	patchedEntity     string
+}
+
+func (s *mockCtxSource) CreateEntity(typeName, entityID string, r Request) error {
+	if s.createEntityShouldFailWithError == nil {
+		s.createdEntity = entityID
+		s.createdEntityType = typeName
+
+		entity := &types.BaseEntity{}
+		return r.DecodeBodyInto(entity)
+	}
+
+	return s.createEntityShouldFailWithError
 }
 
 func (s *mockCtxSource) GetEntities(q Query, cb QueryEntitiesCallback) error {
@@ -128,10 +212,10 @@ func (s *mockCtxSource) GetEntities(q Query, cb QueryEntitiesCallback) error {
 	return nil
 }
 
-func (s *mockCtxSource) UpdateEntityAttributes(entityID string, patch Patch) error {
+func (s *mockCtxSource) UpdateEntityAttributes(entityID string, req Request) error {
 	s.patchedEntity = entityID
 	e := &mockEntity{}
-	return patch.DecodeBodyInto(e)
+	return req.DecodeBodyInto(e)
 }
 
 func (s *mockCtxSource) ProvidesAttribute(attributeName string) bool {

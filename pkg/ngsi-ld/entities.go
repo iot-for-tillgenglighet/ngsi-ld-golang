@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/iot-for-tillgenglighet/ngsi-ld-golang/pkg/ngsi-ld/errors"
+	"github.com/iot-for-tillgenglighet/ngsi-ld-golang/pkg/ngsi-ld/types"
 )
 
 //Entity is an informational representative of something that is supposed to exist in the real world, physically or conceptually
@@ -89,7 +90,7 @@ func NewUpdateEntityAttributesHandler(ctxReg ContextRegistry) http.HandlerFunc {
 
 		entityID := r.URL.Path[entitiesIdx+10 : attrsIdx]
 
-		patch := newPatchFromParameters(r)
+		request := newRequestWrapper(r)
 		contextSources := ctxReg.GetContextSourcesForEntity(entityID)
 
 		if len(contextSources) == 0 {
@@ -98,7 +99,7 @@ func NewUpdateEntityAttributesHandler(ctxReg ContextRegistry) http.HandlerFunc {
 		}
 
 		for _, source := range contextSources {
-			err := source.UpdateEntityAttributes(entityID, patch)
+			err := source.UpdateEntityAttributes(entityID, request)
 			if err != nil {
 				errors.ReportNewInvalidRequest(w, "Unable to update entity attributes: "+err.Error())
 				return
@@ -106,5 +107,32 @@ func NewUpdateEntityAttributesHandler(ctxReg ContextRegistry) http.HandlerFunc {
 		}
 
 		w.WriteHeader(http.StatusNoContent)
+	})
+}
+
+//NewCreateEntityHandler handles incoming POST requests for NGSI entities
+func NewCreateEntityHandler(ctxReg ContextRegistry) http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		request := newRequestWrapper(r)
+
+		entity := &types.BaseEntity{}
+		request.DecodeBodyInto(entity)
+
+		contextSources := ctxReg.GetContextSourcesForEntityType(entity.Type)
+
+		if len(contextSources) == 0 {
+			errors.ReportNewInvalidRequest(w, "No context sources found matching the provided type")
+			return
+		}
+
+		for _, source := range contextSources {
+			err := source.CreateEntity(entity.Type, entity.ID, request)
+			if err != nil {
+				errors.ReportNewInvalidRequest(w, "Failed to create entity: "+err.Error())
+				return
+			}
+		}
+
+		w.WriteHeader(http.StatusCreated)
 	})
 }
