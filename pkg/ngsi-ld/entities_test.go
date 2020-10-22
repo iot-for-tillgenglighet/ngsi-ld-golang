@@ -161,12 +161,12 @@ type mockCtxSource struct {
 	patchedEntity     string
 }
 
-func (s *mockCtxSource) CreateEntity(typeName, entityID string, post Post) error {
+func (s *mockCtxSource) CreateEntity(typeName, entityID string, r Request) error {
 	s.createdEntity = entityID
 	s.createdEntityType = typeName
 
 	entity := &types.BaseEntity{}
-	return post.DecodeBodyInto(entity)
+	return r.DecodeBodyInto(entity)
 }
 
 func (s *mockCtxSource) GetEntities(q Query, cb QueryEntitiesCallback) error {
@@ -181,10 +181,10 @@ func (s *mockCtxSource) GetEntities(q Query, cb QueryEntitiesCallback) error {
 	return nil
 }
 
-func (s *mockCtxSource) UpdateEntityAttributes(entityID string, patch Patch) error {
+func (s *mockCtxSource) UpdateEntityAttributes(entityID string, req Request) error {
 	s.patchedEntity = entityID
 	e := &mockEntity{}
-	return patch.DecodeBodyInto(e)
+	return req.DecodeBodyInto(e)
 }
 
 func (s *mockCtxSource) ProvidesAttribute(attributeName string) bool {

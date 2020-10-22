@@ -69,11 +69,11 @@ func TestThatRequestsWithIDPatternMatchAreForwardedToRemoteContext(t *testing.T)
 	// Send a PATCH request to update entity attributes (that are handled by the "remote" source)
 	entityID := "urn:ngsi-ld:TypeA:myentity"
 	req, _ = http.NewRequest("PATCH", "https://localhost/ngsi-ld/v1/entities/"+entityID+"/attrs/", nil)
-	patch := newPatchFromParameters(req)
+	request := newRequestWrapper(req)
 	sources := ctxRegistry.GetContextSourcesForEntity(entityID)
 
 	for _, src := range sources {
-		err := src.UpdateEntityAttributes(entityID, patch)
+		err := src.UpdateEntityAttributes(entityID, request)
 		if err != nil {
 			t.Error("Failed with unexpected error", err.Error())
 			return

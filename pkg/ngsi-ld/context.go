@@ -79,7 +79,7 @@ type ContextSource interface {
 	ProvidesEntitiesWithMatchingID(entityID string) bool
 	ProvidesType(typeName string) bool
 
-	CreateEntity(typeName, entityID string, request Post) error
+	CreateEntity(typeName, entityID string, request Request) error
 	GetEntities(query Query, callback QueryEntitiesCallback) error
-	UpdateEntityAttributes(entityID string, patch Patch) error
+	UpdateEntityAttributes(entityID string, request Request) error
 }

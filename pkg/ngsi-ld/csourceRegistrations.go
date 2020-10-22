@@ -81,9 +81,9 @@ type remoteContextSource struct {
 	registration CsourceRegistration
 }
 
-func (rcs *remoteContextSource) CreateEntity(typeName, entityID string, post Post) error {
+func (rcs *remoteContextSource) CreateEntity(typeName, entityID string, r Request) error {
 	u, _ := url.Parse(rcs.registration.Endpoint())
-	req := post.Request()
+	req := r.Request()
 
 	req.URL.Host = u.Host
 	req.URL.Scheme = u.Scheme
@@ -157,9 +157,9 @@ func (rcs *remoteContextSource) GetEntities(query Query, callback QueryEntitiesC
 	return err
 }
 
-func (rcs *remoteContextSource) UpdateEntityAttributes(entityID string, patch Patch) error {
+func (rcs *remoteContextSource) UpdateEntityAttributes(entityID string, r Request) error {
 	u, err := url.Parse(rcs.registration.Endpoint())
-	req := patch.Request()
+	req := r.Request()
 
 	req.URL.Host = u.Host
 	req.URL.Scheme = u.Scheme

@@ -8,28 +8,28 @@ import (
 	"net/http"
 )
 
-//Post is an interface to be used when passing header and body information for Post requests
-type Post interface {
+//Request is an interface to be used when passing header and body information for NGSI-LD API requests
+type Request interface {
 	BodyReader() io.Reader
 	DecodeBodyInto(v interface{}) error
 	Request() *http.Request
 }
 
-func newPostFromParameters(req *http.Request) Post {
-	pw := &postWrapper{request: req}
-	return pw
+func newRequestWrapper(req *http.Request) Request {
+	rw := &requestWrapper{request: req}
+	return rw
 }
 
-type postWrapper struct {
+type requestWrapper struct {
 	request *http.Request
 }
 
-func (p *postWrapper) Request() *http.Request {
-	return p.request
+func (r *requestWrapper) Request() *http.Request {
+	return r.request
 }
 
-func (p *postWrapper) BodyReader() io.Reader {
-	req := p.Request()
+func (r *requestWrapper) BodyReader() io.Reader {
+	req := r.Request()
 
 	// Request bodies can only be read once, so read the request's body ...
 	buf, _ := ioutil.ReadAll(req.Body)
@@ -39,6 +39,6 @@ func (p *postWrapper) BodyReader() io.Reader {
 	return ioutil.NopCloser(bytes.NewBuffer(buf))
 }
 
-func (p *postWrapper) DecodeBodyInto(v interface{}) error {
-	return json.NewDecoder(p.BodyReader()).Decode(v)
+func (r *requestWrapper) DecodeBodyInto(v interface{}) error {
+	return json.NewDecoder(r.BodyReader()).Decode(v)
 }

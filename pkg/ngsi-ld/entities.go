@@ -90,7 +90,7 @@ func NewUpdateEntityAttributesHandler(ctxReg ContextRegistry) http.HandlerFunc {
 
 		entityID := r.URL.Path[entitiesIdx+10 : attrsIdx]
 
-		patch := newPatchFromParameters(r)
+		request := newRequestWrapper(r)
 		contextSources := ctxReg.GetContextSourcesForEntity(entityID)
 
 		if len(contextSources) == 0 {
@@ -99,7 +99,7 @@ func NewUpdateEntityAttributesHandler(ctxReg ContextRegistry) http.HandlerFunc {
 		}
 
 		for _, source := range contextSources {
-			err := source.UpdateEntityAttributes(entityID, patch)
+			err := source.UpdateEntityAttributes(entityID, request)
 			if err != nil {
 				errors.ReportNewInvalidRequest(w, "Unable to update entity attributes: "+err.Error())
 				return
@@ -113,7 +113,7 @@ func NewUpdateEntityAttributesHandler(ctxReg ContextRegistry) http.HandlerFunc {
 //NewCreateEntityHandler handles incoming POST requests for NGSI entities
 func NewCreateEntityHandler(ctxReg ContextRegistry) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		request := newPostFromParameters(r)
+		request := newRequestWrapper(r)
 
 		entity := &types.BaseEntity{}
 		request.DecodeBodyInto(entity)
