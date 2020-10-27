@@ -12,6 +12,7 @@ type Device struct {
 	Value        *ngsi.TextProperty     `json:"value"`
 	DateCreated  *ngsi.DateTimeProperty `json:"dateCreated,omitempty"`
 	DateModified *ngsi.DateTimeProperty `json:"dateModified,omitempty"`
+	Location     *ngsi.GeoJSONProperty  `json:"location,omitempty"`
 }
 
 //NewDevice creates a new Device from given ID and Value
