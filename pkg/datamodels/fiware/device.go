@@ -9,11 +9,11 @@ import (
 //Device is a Fiware entity
 type Device struct {
 	ngsi.BaseEntity
-	Value          *ngsi.TextProperty     `json:"value"`
-	DateCreated    *ngsi.DateTimeProperty `json:"dateCreated,omitempty"`
-	DateModified   *ngsi.DateTimeProperty `json:"dateModified,omitempty"`
-	Location       *ngsi.GeoJSONProperty  `json:"location,omitempty"`
-	RefDeviceModel *ngsi.Relationship     `json:"refDeviceModel,omitempty"`
+	Value          *ngsi.TextProperty       `json:"value"`
+	DateCreated    *ngsi.DateTimeProperty   `json:"dateCreated,omitempty"`
+	DateModified   *ngsi.DateTimeProperty   `json:"dateModified,omitempty"`
+	Location       *ngsi.GeoJSONProperty    `json:"location,omitempty"`
+	RefDeviceModel *ngsi.DeviceRelationship `json:"refDeviceModel,omitempty"`
 }
 
 //NewDevice creates a new Device from given ID and Value
