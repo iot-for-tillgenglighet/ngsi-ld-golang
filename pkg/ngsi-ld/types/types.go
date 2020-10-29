@@ -1,6 +1,7 @@
 package types
 
 import (
+	"errors"
 	"strconv"
 	"strings"
 )
@@ -137,4 +138,23 @@ func CreateDeviceRelationshipFromDevice(device string) *DeviceRelationship {
 type PointOfInterestRelationship struct {
 	Relationship
 	Object string `json:"object"`
+}
+
+//DeviceModelRelationship stores information about a devices' relationship to a DeviceModel
+type DeviceModelRelationship struct {
+	Relationship
+	Object string `json:"object"`
+}
+
+//NewDeviceModelRelationship creates relationship instance to DeviceModelID
+func NewDeviceModelRelationship(deviceModelID string) (*DeviceModelRelationship, error) {
+	const deviceModelIDPrefix = "urn:ngsi-ld:DeviceModel:"
+	if strings.HasPrefix(deviceModelID, deviceModelIDPrefix) == false {
+		return nil, errors.New("DeviceModelID does not have correct prefix " + deviceModelIDPrefix)
+	}
+
+	return &DeviceModelRelationship{
+		Relationship: Relationship{Type: "Relationship"},
+		Object:       deviceModelID,
+	}, nil
 }
