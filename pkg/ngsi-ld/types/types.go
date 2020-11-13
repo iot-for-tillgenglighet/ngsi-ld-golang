@@ -158,3 +158,50 @@ func NewDeviceModelRelationship(deviceModelID string) (*DeviceModelRelationship,
 		Object:       deviceModelID,
 	}, nil
 }
+
+type RoadRelationship struct {
+	Relationship
+	Value string `json:"value"`
+}
+
+//NewRoadRelationship accepts a value as a string and returns a new RoadRelationship
+func NewRoadRelationship(value string) *RoadRelationship {
+	return &RoadRelationship{
+		Relationship: Relationship{Type: "Relationship"},
+		Value:        value,
+	}
+}
+
+type RoadSegmentRelationship struct {
+	Relationship
+	Object []string `json:"object"`
+}
+
+func NewRoadSegmentRelationship(roadSegmentIdentities []string) RoadSegmentRelationship {
+	p := RoadSegmentRelationship{
+		Relationship: Relationship{Type: "Relationship"},
+	}
+
+	p.Object = roadSegmentIdentities
+
+	return p
+}
+
+type RoadSegmentLocation struct {
+	Property
+	Value struct {
+		Type        string       `json:"type"`
+		Coordinates [][2]float64 `json:"coordinates"`
+	} `json:"value"`
+}
+
+func NewRoadSegmentLocation(roadCoords [][2]float64) RoadSegmentLocation {
+	r := RoadSegmentLocation{
+		Property: Property{Type: "GeoProperty"},
+	}
+
+	r.Value.Type = "LineString"
+	r.Value.Coordinates = roadCoords
+
+	return r
+}

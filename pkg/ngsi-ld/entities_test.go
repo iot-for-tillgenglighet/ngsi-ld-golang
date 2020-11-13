@@ -35,6 +35,29 @@ func TestMain(m *testing.M) {
 	os.Exit(m.Run())
 }
 
+func TestNewRoadSegment(t *testing.T) {
+	id := "urn:ngsi-ld:RoadSegment:road1"
+	roadID := "road"
+	name := "segName"
+
+	coords := [][2]float64{
+		{0.0, 0.0},
+		{1.1, 6.5},
+	}
+
+	roadSegment := fiware.NewRoadSegment(id, name, roadID, coords)
+
+	if len(roadSegment.Location.Value.Coordinates) != 2 {
+		t.Error("Number of coords not as expected.")
+	}
+
+	for index, point := range roadSegment.Location.Value.Coordinates {
+		if point != coords[index] {
+			t.Error("Coords do not match.")
+		}
+	}
+}
+
 func TestCreateEntityUsesCorrectTypeAndID(t *testing.T) {
 	entityID := "urn:ngsi-ld:Device:livboj"
 	byteReader, typeName := newEntityAsByteBuffer(entityID)
