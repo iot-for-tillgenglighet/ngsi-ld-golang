@@ -161,14 +161,14 @@ func NewDeviceModelRelationship(deviceModelID string) (*DeviceModelRelationship,
 
 type RoadRelationship struct {
 	Relationship
-	Value string `json:"value"`
+	Object string `json:"value"`
 }
 
 //NewRoadRelationship accepts a value as a string and returns a new RoadRelationship
 func NewRoadRelationship(value string) *RoadRelationship {
 	return &RoadRelationship{
 		Relationship: Relationship{Type: "Relationship"},
-		Value:        value,
+		Object:       value,
 	}
 }
 
