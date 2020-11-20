@@ -164,11 +164,11 @@ type RoadRelationship struct {
 	Object string `json:"object"`
 }
 
-//NewRoadRelationship accepts a value as a string and returns a new RoadRelationship
-func NewRoadRelationship(value string) *RoadRelationship {
+//NewRoadRelationship accepts a roadIdentitity as a string and returns a new RoadRelationship
+func NewRoadRelationship(roadIdentity string) *RoadRelationship {
 	return &RoadRelationship{
 		Relationship: Relationship{Type: "Relationship"},
-		Object:       value,
+		Object:       roadIdentity,
 	}
 }
 
