@@ -35,7 +35,7 @@ func NewQueryEntitiesHandler(ctxReg ContextRegistry) http.HandlerFunc {
 		attributes := strings.Split(attributeNames, ",")
 
 		q := r.URL.Query().Get("q")
-		query := newQueryFromParameters(r, entityTypes, attributes, q)
+		query, _ := newQueryFromParameters(r, entityTypes, attributes, q)
 
 		contextSources := ctxReg.GetContextSourcesForQuery(query)
 

@@ -17,9 +17,8 @@ func TestRegisterContextSource(t *testing.T) {
 
 	NewRegisterContextSourceHandler(ctxRegistry).ServeHTTP(w, req)
 
-	sources := ctxRegistry.GetContextSourcesForQuery(
-		newQueryFromParameters(nil, []string{"Point"}, []string{"x"}, ""),
-	)
+	q, _ := newQueryFromParameters(req, []string{"Point"}, []string{"x"}, "")
+	sources := ctxRegistry.GetContextSourcesForQuery(q)
 
 	if len(sources) != 1 {
 		t.Error("The registered context source was not added to the registry.")
@@ -96,7 +95,7 @@ func TestThatRequestsAreForwardedToRemoteContext(t *testing.T) {
 
 	// Send a GET request for entities of type WeatherObserved (that are handled by the "remote" source)
 	req, _ = http.NewRequest("GET", "https://localhost/ngsi-ld/v1/entities?type=WeatherObserved", nil)
-	query := newQueryFromParameters(req, []string{"WeatherObserved"}, []string{"snowHeight"}, "")
+	query, _ := newQueryFromParameters(req, []string{"WeatherObserved"}, []string{"snowHeight"}, "")
 	sources := ctxRegistry.GetContextSourcesForQuery(query)
 
 	numEntities := 0

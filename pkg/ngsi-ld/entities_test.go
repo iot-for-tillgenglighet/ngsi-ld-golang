@@ -152,6 +152,39 @@ func TestGetEntitiesForDevice(t *testing.T) {
 	}
 }
 
+func TestGetEntitiesWithGeoQueryNearPoint(t *testing.T) {
+	req, _ := http.NewRequest("GET", createURL(
+		"/entitites",
+		"type=RoadSegment",
+		"georel=near;maxDistance==2000",
+		"geometry=Point",
+		"coordinates=[8,40]"),
+		nil)
+	w := httptest.NewRecorder()
+	contextRegistry := NewContextRegistry()
+	contextSource := newMockedContextSource("RoadSegment", "")
+	contextRegistry.Register(contextSource)
+
+	NewQueryEntitiesHandler(contextRegistry).ServeHTTP(w, req)
+
+	query := contextSource.generatedQuery
+	if query.IsGeoQuery() == false {
+		t.Error("Expected a GeoQuery from the QueryEntititesHandler")
+	} else {
+		geo := query.Geo()
+
+		distance, _ := geo.Distance()
+		if distance != 2000 {
+			t.Error("Unexpected near distance parsed from geo query:", distance, "!=", 2000)
+		}
+
+		x, y, _ := geo.Point()
+		if x != 8 || y != 40 {
+			t.Error("Mismatching point: (", x, ",", y, ") != ( 8 , 40 )")
+		}
+	}
+}
+
 func TestUpdateEntitityAttributes(t *testing.T) {
 	deviceID := "urn:ngsi-ld:Device:mydevice"
 	jsonBytes, _ := json.Marshal(e("testvalue"))
@@ -209,6 +242,8 @@ type mockCtxSource struct {
 	createdEntity     string
 	createdEntityType string
 	patchedEntity     string
+
+	generatedQuery Query
 }
 
 func (s *mockCtxSource) CreateEntity(typeName, entityID string, r Request) error {
@@ -224,6 +259,8 @@ func (s *mockCtxSource) CreateEntity(typeName, entityID string, r Request) error
 }
 
 func (s *mockCtxSource) GetEntities(q Query, cb QueryEntitiesCallback) error {
+
+	s.generatedQuery = q
 
 	if q.HasDeviceReference() {
 		s.queriedDevice = q.Device()
