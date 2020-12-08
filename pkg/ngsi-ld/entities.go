@@ -35,12 +35,17 @@ func NewQueryEntitiesHandler(ctxReg ContextRegistry) http.HandlerFunc {
 		attributes := strings.Split(attributeNames, ",")
 
 		q := r.URL.Query().Get("q")
-		query, _ := newQueryFromParameters(r, entityTypes, attributes, q)
+		query, err := newQueryFromParameters(r, entityTypes, attributes, q)
+		if err != nil {
+			errors.ReportNewBadRequestData(
+				w, err.Error(),
+			)
+			return
+		}
 
 		contextSources := ctxReg.GetContextSourcesForQuery(query)
 
 		var entities = []Entity{}
-		var err error
 
 		for _, source := range contextSources {
 			err = source.GetEntities(query, func(entity Entity) error {

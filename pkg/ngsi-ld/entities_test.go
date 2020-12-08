@@ -167,6 +167,11 @@ func TestGetEntitiesWithGeoQueryNearPoint(t *testing.T) {
 
 	NewQueryEntitiesHandler(contextRegistry).ServeHTTP(w, req)
 
+	if w.Code != 200 {
+		t.Error("Unexpected response code", w.Code, w.Body.String())
+		return
+	}
+
 	query := contextSource.generatedQuery
 	if query.IsGeoQuery() == false {
 		t.Error("Expected a GeoQuery from the QueryEntititesHandler")
@@ -181,6 +186,38 @@ func TestGetEntitiesWithGeoQueryNearPoint(t *testing.T) {
 		x, y, _ := geo.Point()
 		if x != 8 || y != 40 {
 			t.Error("Mismatching point: (", x, ",", y, ") != ( 8 , 40 )")
+		}
+	}
+}
+
+func TestGetEntitiesWithGeoQueryWithinRect(t *testing.T) {
+	req, _ := http.NewRequest("GET", createURL(
+		"/entitites",
+		"type=RoadSegment",
+		"georel=within",
+		"geometry=Polygon",
+		"coordinates=[[8,40],[9,41],[10,42]]"),
+		nil)
+	w := httptest.NewRecorder()
+	contextRegistry := NewContextRegistry()
+	contextSource := newMockedContextSource("RoadSegment", "")
+	contextRegistry.Register(contextSource)
+
+	NewQueryEntitiesHandler(contextRegistry).ServeHTTP(w, req)
+
+	if w.Code != 200 {
+		t.Error("Handler failed with exit code", w.Code, w.Body.String())
+		return
+	}
+
+	query := contextSource.generatedQuery
+	if query.IsGeoQuery() == false {
+		t.Error("Expected a GeoQuery from the QueryEntititesHandler")
+	} else {
+		geo := query.Geo()
+		lon0, lat0, lon1, lat1, _ := geo.Rectangle()
+		if lon0 != 8 || lat0 != 40 || lon1 != 10 || lat1 != 42 {
+			t.Error("Bad coordinates in GeoQuery rect")
 		}
 	}
 }
