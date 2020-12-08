@@ -201,6 +201,7 @@ func parseGeometryCoordinates(coordparameter string) ([]float64, error) {
 				lat = float64(intpart) + decpart
 				intpart = 0
 				decpart = 0.0
+				decfactor = 1.0
 
 				coordinates = append(coordinates, lon, lat)
 				state = prelon
@@ -233,6 +234,8 @@ func parseGeometryCoordinates(coordparameter string) ([]float64, error) {
 				lon = float64(intpart) + decpart
 				intpart = 0
 				decpart = 0.0
+				decfactor = 1.0
+
 				state = prelat
 			}
 		} else {
