@@ -92,7 +92,7 @@ func newGeoQueryFromHTTPRequest(georel string, req *http.Request) (*GeoQuery, er
 	var err error
 
 	if georel == GeoSpatialRelationNearPoint {
-		geoQuery := &GeoQuery{Geometry: "Point"}
+		geoQuery := &GeoQuery{Geometry: "Point", GeoRel: GeoSpatialRelationNearPoint}
 
 		if req.URL.Query().Get("geometry") != "Point" {
 			return nil, errors.New("The geospatial relationship near is only defined for the geometry type Point")
@@ -128,7 +128,7 @@ func newGeoQueryFromHTTPRequest(georel string, req *http.Request) (*GeoQuery, er
 
 		return geoQuery, nil
 	} else if georel == GeoSpatialRelationWithinRect {
-		geoQuery := &GeoQuery{Geometry: "Polygon"}
+		geoQuery := &GeoQuery{Geometry: "Polygon", GeoRel: GeoSpatialRelationWithinRect}
 
 		if req.URL.Query().Get("geometry") != "Polygon" {
 			return nil, errors.New("The geospatial relationship \"within\" is only defined for the geometry type Polygon")

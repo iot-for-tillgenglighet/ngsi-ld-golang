@@ -178,6 +178,10 @@ func TestGetEntitiesWithGeoQueryNearPoint(t *testing.T) {
 	} else {
 		geo := query.Geo()
 
+		if geo.GeoRel != "near" {
+			t.Error("Geospatial relation not correctly saved in geo query (" + geo.GeoRel + " != near)")
+		}
+
 		distance, _ := geo.Distance()
 		if distance != 2000 {
 			t.Error("Unexpected near distance parsed from geo query:", distance, "!=", 2000)
@@ -215,6 +219,11 @@ func TestGetEntitiesWithGeoQueryWithinRect(t *testing.T) {
 		t.Error("Expected a GeoQuery from the QueryEntititesHandler")
 	} else {
 		geo := query.Geo()
+
+		if geo.GeoRel != "within" {
+			t.Error("Geospatial relation not correctly saved in geo query (" + geo.GeoRel + " != within)")
+		}
+
 		lon0, lat0, lon1, lat1, _ := geo.Rectangle()
 		if lon0 != 8 || lat0 != 40 || lon1 != 10 || lat1 != 42 {
 			t.Error("Bad coordinates in GeoQuery rect")
