@@ -122,7 +122,6 @@ func newGeoQueryFromHTTPRequest(georel string, req *http.Request) (*GeoQuery, er
 		}
 
 		if len(geoQuery.Coordinates) != 2 {
-			fmt.Printf("expected one position for a Point geometry, but got %d\n", len(geoQuery.Coordinates)/2)
 			return nil, fmt.Errorf("expected one position for a Point geometry, but got %d", len(geoQuery.Coordinates)/2)
 		}
 
@@ -173,8 +172,6 @@ func parseGeometryCoordinates(coordparameter string) ([]float64, error) {
 
 	for i := range coordparameter {
 		b := coordparameter[i]
-
-		//fmt.Printf("Byte: %c State: %d\n", b, state)
 
 		if state == init {
 			if b != '[' {

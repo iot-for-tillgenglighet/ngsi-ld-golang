@@ -61,13 +61,11 @@ func (rr *remoteResponse) Header() http.Header {
 }
 
 func (rr *remoteResponse) Write(b []byte) (int, error) {
-	fmt.Println("Write: " + string(b))
 	rr.bytes = append(rr.bytes, b...)
 	return len(b), nil
 }
 
 func (rr *remoteResponse) WriteHeader(responseCode int) {
-	fmt.Println("Response Code: ", responseCode)
 	rr.responseCode = responseCode
 }
 
@@ -96,10 +94,6 @@ func (rcs *remoteContextSource) CreateEntity(typeName, entityID string, r Reques
 
 	// Change the User-Agent header to something more appropriate
 	req.Header.Add("User-Agent", "ngsi-context-broker/0.1")
-
-	fmt.Println("Forwarding request to: " + req.URL.String())
-	b, _ := httputil.DumpRequestOut(req, false)
-	fmt.Println(string(b))
 
 	response := &remoteResponse{}
 	proxy := httputil.NewSingleHostReverseProxy(u)
@@ -130,10 +124,6 @@ func (rcs *remoteContextSource) GetEntities(query Query, callback QueryEntitiesC
 
 	// We do not want to propagate the Accept-Encoding header to prevent compression
 	req.Header.Del("Accept-Encoding")
-
-	fmt.Println("Forwarding request to: " + req.URL.String())
-	b, _ := httputil.DumpRequestOut(req, false)
-	fmt.Println(string(b))
 
 	response := &remoteResponse{}
 	proxy := httputil.NewSingleHostReverseProxy(u)
@@ -172,10 +162,6 @@ func (rcs *remoteContextSource) UpdateEntityAttributes(entityID string, r Reques
 
 	// Change the User-Agent header to something more appropriate
 	req.Header.Add("User-Agent", "ngsi-context-broker/0.1")
-
-	fmt.Println("Forwarding request to: " + req.URL.String())
-	b, _ := httputil.DumpRequestOut(req, true)
-	fmt.Println(string(b))
 
 	response := &remoteResponse{}
 	proxy := httputil.NewSingleHostReverseProxy(u)
