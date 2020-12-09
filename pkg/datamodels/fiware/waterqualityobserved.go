@@ -29,7 +29,7 @@ func NewWaterQualityObserved(device string, latitude float64, longitude float64,
 
 	return &WaterQualityObserved{
 		DateObserved: *dateTimeValue,
-		Location:     ngsi.CreateGeoJSONPropertyFromWGS84(latitude, longitude),
+		Location:     ngsi.CreateGeoJSONPropertyFromWGS84(longitude, latitude),
 		RefDevice:    refDevice,
 		BaseEntity: ngsi.BaseEntity{
 			ID:   id,

@@ -49,7 +49,7 @@ type GeoJSONProperty struct {
 }
 
 //CreateGeoJSONPropertyFromWGS84 creates a GeoJSONProperty from a WGS84 coordinate
-func CreateGeoJSONPropertyFromWGS84(latitude, longitude float64) GeoJSONProperty {
+func CreateGeoJSONPropertyFromWGS84(longitude, latitude float64) GeoJSONProperty {
 	p := GeoJSONProperty{
 		Property: Property{Type: "GeoProperty"},
 	}

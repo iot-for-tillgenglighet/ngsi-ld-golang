@@ -20,7 +20,7 @@ func NewOpen311ServiceRequest(latitude float64, longitude float64, reportedType 
 
 	return &Open311ServiceRequest{
 		RequestedDateTime: dateTimeValue,
-		Location:          ngsi.CreateGeoJSONPropertyFromWGS84(latitude, longitude),
+		Location:          ngsi.CreateGeoJSONPropertyFromWGS84(longitude, latitude),
 		ServiceCode:       *ngsi.NewNumberPropertyFromInt(reportedType),
 		BaseEntity: ngsi.BaseEntity{
 			ID:   id,
