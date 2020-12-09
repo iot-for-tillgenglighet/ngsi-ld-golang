@@ -13,6 +13,9 @@ type Query interface {
 	HasDeviceReference() bool
 	Device() string
 
+	PaginationLimit() uint64
+	PaginationOffset() uint64
+
 	IsGeoQuery() bool
 	Geo() *GeoQuery
 
@@ -27,6 +30,10 @@ const (
 	GeoSpatialRelationNearPoint = "near"
 	//GeoSpatialRelationWithinRect describes a relation as an overlapping polygon
 	GeoSpatialRelationWithinRect = "within"
+
+	//QueryDefaultPaginationLimit defines the limit that should be used for GET operations
+	//when the client does not supply a value
+	QueryDefaultPaginationLimit = uint64(1000)
 )
 
 //GeoQuery contains information about a geo-query that may be used for subscriptions
@@ -73,6 +80,28 @@ func newQueryFromParameters(req *http.Request, types []string, attributes []stri
 	const refDevicePrefix string = "refDevice==\""
 
 	qw := &queryWrapper{request: req, types: types, attributes: attributes}
+
+	limitparam := req.URL.Query().Get("limit")
+	if limitparam != "" {
+		limit, err := strconv.ParseInt(limitparam, 10, 64)
+		if err != nil {
+			return nil, fmt.Errorf("Unable to parse limit parameter %s into an int value", limitparam)
+		}
+		if limit > 0 {
+			qw.limit = uint64(limit)
+		}
+	}
+
+	offsetparam := req.URL.Query().Get("offset")
+	if offsetparam != "" {
+		offset, err := strconv.ParseInt(offsetparam, 10, 64)
+		if err != nil {
+			return nil, fmt.Errorf("Unable to parse offset parameter %s into an int value", offsetparam)
+		}
+		if offset >= 0 {
+			qw.offset = uint64(offset)
+		}
+	}
 
 	if strings.HasPrefix(q, refDevicePrefix) {
 		splitElems := strings.Split(q, "\"")
@@ -253,6 +282,9 @@ type queryWrapper struct {
 	attributes []string
 	device     *string
 
+	limit  uint64
+	offset uint64
+
 	geoQuery *GeoQuery
 }
 
@@ -278,6 +310,18 @@ func (q *queryWrapper) EntityAttributes() []string {
 
 func (q *queryWrapper) EntityTypes() []string {
 	return q.types
+}
+
+func (q *queryWrapper) PaginationLimit() uint64 {
+	if q.limit > 0 {
+		return q.limit
+	}
+
+	return QueryDefaultPaginationLimit
+}
+
+func (q *queryWrapper) PaginationOffset() uint64 {
+	return q.offset
 }
 
 func (q *queryWrapper) Request() *http.Request {

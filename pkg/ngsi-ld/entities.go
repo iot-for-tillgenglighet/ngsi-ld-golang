@@ -46,10 +46,19 @@ func NewQueryEntitiesHandler(ctxReg ContextRegistry) http.HandlerFunc {
 		contextSources := ctxReg.GetContextSourcesForQuery(query)
 
 		var entities = []Entity{}
+		var entityCount = uint64(0)
+		var entityMaxCount = uint64(18446744073709551615) // uint64 max
+
+		if query.PaginationLimit() > 0 {
+			entityMaxCount = query.PaginationLimit()
+		}
 
 		for _, source := range contextSources {
 			err = source.GetEntities(query, func(entity Entity) error {
-				entities = append(entities, entity)
+				if entityCount < entityMaxCount {
+					entities = append(entities, entity)
+					entityCount++
+				}
 				return nil
 			})
 			if err != nil {
@@ -72,6 +81,7 @@ func NewQueryEntitiesHandler(ctxReg ContextRegistry) http.HandlerFunc {
 		}
 
 		w.Header().Add("Content-Type", "application/ld+json")
+		// TODO: Add a RFC 8288 Link header with information about previous and/or next page if they exist
 		w.Write(bytes)
 	})
 }
