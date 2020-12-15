@@ -6,6 +6,12 @@ import (
 	ngsi "github.com/iot-for-tillgenglighet/ngsi-ld-golang/pkg/ngsi-ld/types"
 )
 
+//RoadSurfaceType contains a surface type and a probability
+type RoadSurfaceType struct {
+	ngsi.TextProperty
+	Probability float64 `json:"probability"`
+}
+
 //RoadSegment is a Fiware entity
 type RoadSegment struct {
 	ngsi.BaseEntity
@@ -17,6 +23,7 @@ type RoadSegment struct {
 	StartPoint      ngsi.GeoJSONProperty     `json:"startPoint"`
 	RefRoad         *ngsi.RoadRelationship   `json:"refRoad,omitempty"`
 	TotalLaneNumber *ngsi.NumberProperty     `json:"totalLaneNumber"`
+	SurfaceType     *RoadSurfaceType         `json:"surfaceType,omitempty"`
 }
 
 //NewRoadSegment creates a new instance of RoadSegment
@@ -50,4 +57,18 @@ func NewRoadSegment(id, roadSegmentName, roadID string, coords [][2]float64) *Ro
 			},
 		},
 	}
+}
+
+//WithSurfaceType takes a string surfaceType and a probability and returns the road segment instance
+func (rs *RoadSegment) WithSurfaceType(surfaceType string, probability float64) *RoadSegment {
+
+	rs.SurfaceType = &RoadSurfaceType{
+		TextProperty: ngsi.TextProperty{
+			Property: ngsi.Property{Type: "Property"},
+			Value:    surfaceType,
+		},
+		Probability: probability,
+	}
+
+	return rs
 }
