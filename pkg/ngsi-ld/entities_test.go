@@ -45,7 +45,7 @@ func TestNewRoadSegment(t *testing.T) {
 		{1.1, 6.5},
 	}
 
-	roadSegment := fiware.NewRoadSegment(id, name, roadID, coords)
+	roadSegment := fiware.NewRoadSegment(id, name, roadID, coords, nil)
 
 	if len(roadSegment.Location.Value.Coordinates) != 2 {
 		t.Error("Number of coords not as expected.")

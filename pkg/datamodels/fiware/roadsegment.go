@@ -2,6 +2,7 @@ package fiware
 
 import (
 	"strings"
+	"time"
 
 	ngsi "github.com/iot-for-tillgenglighet/ngsi-ld-golang/pkg/ngsi-ld/types"
 )
@@ -27,7 +28,7 @@ type RoadSegment struct {
 }
 
 //NewRoadSegment creates a new instance of RoadSegment
-func NewRoadSegment(id, roadSegmentName, roadID string, coords [][2]float64) *RoadSegment {
+func NewRoadSegment(id, roadSegmentName, roadID string, coords [][2]float64, modified *time.Time) *RoadSegment {
 	if strings.HasPrefix(id, "urn:ngsi-ld:RoadSegment:") == false {
 		id = "urn:ngsi-ld:RoadSegment:" + id
 	}
@@ -41,7 +42,7 @@ func NewRoadSegment(id, roadSegmentName, roadID string, coords [][2]float64) *Ro
 	startPoint := coords[0]
 	endPoint := coords[len(coords)-1]
 
-	return &RoadSegment{
+	rs := &RoadSegment{
 		Name:            name,
 		EndPoint:        ngsi.CreateGeoJSONPropertyFromWGS84(endPoint[0], endPoint[1]),
 		StartPoint:      ngsi.CreateGeoJSONPropertyFromWGS84(startPoint[0], startPoint[1]),
@@ -57,6 +58,12 @@ func NewRoadSegment(id, roadSegmentName, roadID string, coords [][2]float64) *Ro
 			},
 		},
 	}
+
+	if modified != nil {
+		rs.DateModified = ngsi.CreateDateTimeProperty(modified.Format(time.RFC3339))
+	}
+
+	return rs
 }
 
 //WithSurfaceType takes a string surfaceType and a probability and returns the road segment instance

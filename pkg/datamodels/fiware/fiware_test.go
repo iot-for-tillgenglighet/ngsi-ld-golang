@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"testing"
+	"time"
 )
 
 func TestMain(m *testing.M) {
@@ -12,7 +13,8 @@ func TestMain(m *testing.M) {
 
 func TestRoadSegment(t *testing.T) {
 	location := [][2]float64{{1.0, 1.0}, {2.0, 2.0}}
-	rs := NewRoadSegment("segid", "segname", "roadid", location)
+	ts := time.Now()
+	rs := NewRoadSegment("segid", "segname", "roadid", location, &ts)
 
 	if rs.ID != "urn:ngsi-ld:RoadSegment:segid" {
 		t.Error(fmt.Sprintf("Expectation failed. Road id %s != %s", rs.ID, "segid"))
