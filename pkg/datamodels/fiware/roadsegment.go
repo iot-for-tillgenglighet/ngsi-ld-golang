@@ -69,12 +69,14 @@ func NewRoadSegment(id, roadSegmentName, roadID string, coords [][2]float64, mod
 //WithSurfaceType takes a string surfaceType and a probability and returns the road segment instance
 func (rs *RoadSegment) WithSurfaceType(surfaceType string, probability float64) *RoadSegment {
 
-	rs.SurfaceType = &RoadSurfaceType{
-		TextProperty: ngsi.TextProperty{
-			Property: ngsi.Property{Type: "Property"},
-			Value:    surfaceType,
-		},
-		Probability: probability,
+	if len(surfaceType) > 0 && probability >= 0.0 && probability <= 1.0 {
+		rs.SurfaceType = &RoadSurfaceType{
+			TextProperty: ngsi.TextProperty{
+				Property: ngsi.Property{Type: "Property"},
+				Value:    surfaceType,
+			},
+			Probability: probability,
+		}
 	}
 
 	return rs
