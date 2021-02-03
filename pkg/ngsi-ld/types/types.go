@@ -89,6 +89,20 @@ type TextProperty struct {
 	Value string `json:"value"`
 }
 
+//TextListProperty stores values of type text list
+type TextListProperty struct {
+	Property
+	Value []string `json:"value"`
+}
+
+//NewTextListProperty accepts a value as a string array and returns a new TextListProperty
+func NewTextListProperty(value []string) *TextListProperty {
+	return &TextListProperty{
+		Property: Property{Type: "Property"},
+		Value:    value,
+	}
+}
+
 //NewNumberPropertyFromString accepts a value as a string and returns a new NumberProperty
 func NewNumberPropertyFromString(value string) *NumberProperty {
 	number, _ := strconv.ParseFloat(value, 64)

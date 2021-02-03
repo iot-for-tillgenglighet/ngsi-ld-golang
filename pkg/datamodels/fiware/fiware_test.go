@@ -20,7 +20,7 @@ func TestRoadSegment(t *testing.T) {
 		t.Error(fmt.Sprintf("Expectation failed. Road id %s != %s", rs.ID, "segid"))
 	}
 
-	probability := 80.0
+	probability := 0.8
 	surfaceType := "snow"
 	rs = rs.WithSurfaceType(surfaceType, probability)
 
@@ -31,4 +31,16 @@ func TestRoadSegment(t *testing.T) {
 	if rs.SurfaceType.Value != surfaceType {
 		t.Error(fmt.Sprintf("Expectation failed. Surface type %s != %s", rs.SurfaceType.Value, surfaceType))
 	}
+}
+
+func TestDeviceModel(t *testing.T) {
+	categories := []string{"temperature"}
+
+	deviceModel := NewDeviceModel("id", categories)
+
+	if deviceModel.Category.Value[0] != categories[0] {
+		t.Error(fmt.Sprintf("Expectation failed. Category does not match %s", categories))
+	}
+
+	// test devicemodel categories are as expected
 }
