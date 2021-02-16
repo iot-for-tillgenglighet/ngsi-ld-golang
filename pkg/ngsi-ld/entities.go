@@ -151,3 +151,49 @@ func NewCreateEntityHandler(ctxReg ContextRegistry) http.HandlerFunc {
 		w.WriteHeader(http.StatusCreated)
 	})
 }
+
+//NewRetrieveEntityHandler retrieves entity by ID.
+func NewRetrieveEntityHandler(ctxReg ContextRegistry) http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		entitiesIdx := strings.Index(r.URL.Path, "/entities/")
+
+		if entitiesIdx == -1 {
+			errors.ReportNewBadRequestData(
+				w,
+				"The supplied URL is invalid.",
+			)
+			return
+		}
+
+		entityID := r.URL.Path[entitiesIdx+10 : len(r.URL.Path)]
+
+		contextSources := ctxReg.GetContextSourcesForEntity(entityID)
+
+		if len(contextSources) == 0 {
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+
+		var entity Entity
+		var err error
+
+		for _, source := range contextSources {
+			entity, err = source.RetrieveEntity(entityID)
+			if err != nil {
+				errors.ReportNewInvalidRequest(w, "Failed to find entity: "+err.Error())
+				return
+			}
+			break
+		}
+
+		if entity == nil {
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+
+		bytes, err := json.Marshal(entity)
+
+		w.Header().Add("Content-Type", "application/ld+json")
+		w.Write(bytes)
+	})
+}

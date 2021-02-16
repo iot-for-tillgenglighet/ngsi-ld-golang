@@ -231,6 +231,25 @@ func TestGetEntitiesWithGeoQueryWithinRect(t *testing.T) {
 	}
 }
 
+func TestRetrieveEntity(t *testing.T) {
+	deviceID := "urn:ngsi-ld:Device:mydevice"
+	req, _ := http.NewRequest("GET", createURL("/entities/"+deviceID), nil)
+	w := httptest.NewRecorder()
+	contextRegistry := NewContextRegistry()
+	contextSource := newMockedContextSource("Device", "")
+	contextRegistry.Register(contextSource)
+
+	NewRetrieveEntityHandler(contextRegistry).ServeHTTP(w, req)
+
+	if contextSource.retrievedEntity != deviceID {
+		t.Errorf("DeviceID %s does not match retrievedEntity %s", deviceID, contextSource.retrievedEntity)
+	}
+
+	if w.Code != http.StatusOK {
+		t.Error("Something went wrong.")
+	}
+}
+
 func TestUpdateEntitityAttributes(t *testing.T) {
 	deviceID := "urn:ngsi-ld:Device:mydevice"
 	jsonBytes, _ := json.Marshal(e("testvalue"))
@@ -288,6 +307,7 @@ type mockCtxSource struct {
 	createdEntity     string
 	createdEntityType string
 	patchedEntity     string
+	retrievedEntity   string
 
 	generatedQuery Query
 }
@@ -334,4 +354,10 @@ func (s *mockCtxSource) ProvidesEntitiesWithMatchingID(entityID string) bool {
 
 func (s *mockCtxSource) ProvidesType(typeName string) bool {
 	return s.typeName == typeName
+}
+
+func (s *mockCtxSource) RetrieveEntity(entityID string) (Entity, error) {
+	s.retrievedEntity = entityID
+	e := &mockEntity{}
+	return e, nil
 }

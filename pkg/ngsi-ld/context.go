@@ -81,5 +81,6 @@ type ContextSource interface {
 
 	CreateEntity(typeName, entityID string, request Request) error
 	GetEntities(query Query, callback QueryEntitiesCallback) error
+	RetrieveEntity(entityID string) (Entity, error)
 	UpdateEntityAttributes(entityID string, request Request) error
 }

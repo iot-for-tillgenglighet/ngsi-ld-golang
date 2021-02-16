@@ -182,6 +182,11 @@ func (rcs *remoteContextSource) ProvidesType(typeName string) bool {
 	return rcs.registration.ProvidesType(typeName)
 }
 
+func (rcs *remoteContextSource) RetrieveEntity(entityID string) (Entity, error) {
+
+	return nil, nil
+}
+
 type ctxSrcReg struct {
 	Type        string          `json:"type"`
 	Information []ctxSrcRegInfo `json:"information"`
