@@ -174,11 +174,13 @@ func NewRetrieveEntityHandler(ctxReg ContextRegistry) http.HandlerFunc {
 			return
 		}
 
+		request := newRequestWrapper(r)
+
 		var entity Entity
 		var err error
 
 		for _, source := range contextSources {
-			entity, err = source.RetrieveEntity(entityID)
+			entity, err = source.RetrieveEntity(entityID, request)
 			if err != nil {
 				errors.ReportNewInvalidRequest(w, "Failed to find entity: "+err.Error())
 				return

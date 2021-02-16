@@ -182,9 +182,36 @@ func (rcs *remoteContextSource) ProvidesType(typeName string) bool {
 	return rcs.registration.ProvidesType(typeName)
 }
 
-func (rcs *remoteContextSource) RetrieveEntity(entityID string) (Entity, error) {
+func (rcs *remoteContextSource) RetrieveEntity(entityID string, r Request) (Entity, error) {
+	u, err := url.Parse(rcs.registration.Endpoint())
+	req := r.Request()
 
-	return nil, nil
+	req.URL.Host = u.Host
+	req.URL.Scheme = u.Scheme
+
+	forwardedHost := req.Header.Get("Host")
+	if forwardedHost != "" {
+		req.Header.Set("X-Forwarded-Host", forwardedHost)
+	}
+	req.Host = u.Host
+
+	// Change the User-Agent header to something more appropriate
+	req.Header.Add("User-Agent", "ngsi-context-broker/0.1")
+
+	response := &remoteResponse{}
+	proxy := httputil.NewSingleHostReverseProxy(u)
+	proxy.ServeHTTP(response, req)
+
+	var entity interface{}
+
+	if response.responseCode == http.StatusOK {
+		err = json.Unmarshal(response.bytes, &entity)
+		if err == nil {
+			return entity, nil
+		}
+	}
+
+	return nil, fmt.Errorf("Failed to retrieve entity %s [%d]", entityID, response.responseCode)
 }
 
 type ctxSrcReg struct {

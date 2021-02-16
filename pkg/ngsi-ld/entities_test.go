@@ -356,7 +356,7 @@ func (s *mockCtxSource) ProvidesType(typeName string) bool {
 	return s.typeName == typeName
 }
 
-func (s *mockCtxSource) RetrieveEntity(entityID string) (Entity, error) {
+func (s *mockCtxSource) RetrieveEntity(entityID string, req Request) (Entity, error) {
 	s.retrievedEntity = entityID
 	e := &mockEntity{}
 	return e, nil
