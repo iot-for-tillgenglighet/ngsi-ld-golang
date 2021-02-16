@@ -11,7 +11,7 @@ type WaterQualityObserved struct {
 	DateModified       *ngsi.DateTimeProperty            `json:"dateModified,omitempty"`
 	DateObserved       ngsi.DateTimeProperty             `json:"dateObserved"`
 	Location           ngsi.GeoJSONProperty              `json:"location"`
-	RefDevice          *ngsi.DeviceRelationship          `json:"refDevice,omitempty"`
+	RefDevice          *DeviceRelationship               `json:"refDevice,omitempty"`
 	RefPointOfInterest *ngsi.PointOfInterestRelationship `json:"refPointOfInterest,omitempty"`
 	Temperature        *ngsi.NumberProperty              `json:"temperature,omitempty"`
 }
@@ -19,7 +19,7 @@ type WaterQualityObserved struct {
 //NewWaterQualityObserved creates a new instance of WaterQualityObserved
 func NewWaterQualityObserved(device string, latitude float64, longitude float64, observedAt string) *WaterQualityObserved {
 	dateTimeValue := ngsi.CreateDateTimeProperty(observedAt)
-	refDevice := ngsi.CreateDeviceRelationshipFromDevice(device)
+	refDevice := CreateDeviceRelationshipFromDevice(device)
 
 	if refDevice == nil {
 		device = "manual"

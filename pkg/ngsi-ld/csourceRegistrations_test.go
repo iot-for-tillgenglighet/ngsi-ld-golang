@@ -3,9 +3,12 @@ package ngsi
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/iot-for-tillgenglighet/ngsi-ld-golang/pkg/datamodels/fiware"
 )
 
 func TestRegisterContextSource(t *testing.T) {
@@ -30,7 +33,7 @@ func TestRegisterContextSource(t *testing.T) {
 }
 
 func TestRegisterContextSourceWithIDPatternMatch(t *testing.T) {
-	regex := "^urn:ngsi-ld:Device:.+"
+	regex := fmt.Sprintf("^%s.+", fiware.DeviceIDPrefix)
 	registrationBody, _ := NewCsourceRegistration("A", []string{"a"}, "lolcathost", &regex)
 	jsonBytes, _ := json.Marshal(registrationBody)
 	ctxRegistry := NewContextRegistry()
@@ -39,7 +42,7 @@ func TestRegisterContextSourceWithIDPatternMatch(t *testing.T) {
 
 	NewRegisterContextSourceHandler(ctxRegistry).ServeHTTP(w, req)
 
-	sources := ctxRegistry.GetContextSourcesForEntity("urn:ngsi-ld:Device:mydevice")
+	sources := ctxRegistry.GetContextSourcesForEntity(fiware.DeviceIDPrefix + "mydevice")
 
 	if len(sources) != 1 {
 		t.Error("The registered context source was not added to the registry.")

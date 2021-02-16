@@ -59,7 +59,7 @@ func TestNewRoadSegment(t *testing.T) {
 }
 
 func TestCreateEntityUsesCorrectTypeAndID(t *testing.T) {
-	entityID := "urn:ngsi-ld:Device:livboj"
+	entityID := fiware.DeviceIDPrefix + "livboj"
 	byteReader, typeName := newEntityAsByteBuffer(entityID)
 	req, _ := http.NewRequest("POST", createURL("/entities"), byteReader)
 	w := httptest.NewRecorder()
@@ -136,7 +136,7 @@ func TestGetEntitiesWithAttribute(t *testing.T) {
 }
 
 func TestGetEntitiesForDevice(t *testing.T) {
-	deviceID := "urn:ngsi-ld:Device:mydevice"
+	deviceID := fiware.DeviceIDPrefix + "mydevice"
 	req, _ := http.NewRequest("GET", createURL("/entitites", "attrs=snowHeight", "q=refDevice==\""+deviceID+"\""), nil)
 	w := httptest.NewRecorder()
 	contextRegistry := NewContextRegistry()
@@ -232,7 +232,7 @@ func TestGetEntitiesWithGeoQueryWithinRect(t *testing.T) {
 }
 
 func TestRetrieveEntity(t *testing.T) {
-	deviceID := "urn:ngsi-ld:Device:mydevice"
+	deviceID := fiware.DeviceIDPrefix + "mydevice"
 	req, _ := http.NewRequest("GET", createURL("/entities/"+deviceID), nil)
 	w := httptest.NewRecorder()
 	contextRegistry := NewContextRegistry()
@@ -251,7 +251,7 @@ func TestRetrieveEntity(t *testing.T) {
 }
 
 func TestUpdateEntitityAttributes(t *testing.T) {
-	deviceID := "urn:ngsi-ld:Device:mydevice"
+	deviceID := fiware.DeviceIDPrefix + "mydevice"
 	jsonBytes, _ := json.Marshal(e("testvalue"))
 
 	req, _ := http.NewRequest("PATCH", createURL("/entities/"+deviceID+"/attrs/"), bytes.NewBuffer(jsonBytes))

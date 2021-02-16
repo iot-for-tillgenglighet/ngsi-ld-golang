@@ -1,9 +1,7 @@
 package types
 
 import (
-	"errors"
 	"strconv"
-	"strings"
 )
 
 //BaseEntity contains the required base properties an Entity must have
@@ -125,52 +123,10 @@ type Relationship struct {
 	Type string `json:"type"`
 }
 
-//DeviceRelationship stores information about an entity's relation to a certain Device
-type DeviceRelationship struct {
-	Relationship
-	Object string `json:"object"`
-}
-
-//CreateDeviceRelationshipFromDevice create a DeviceRelationship from a Device
-func CreateDeviceRelationshipFromDevice(device string) *DeviceRelationship {
-	if len(device) == 0 {
-		return nil
-	}
-
-	const deviceIDPrefix = "urn:ngsi-ld:Device:"
-	if strings.HasPrefix(device, deviceIDPrefix) == false {
-		device = deviceIDPrefix + device
-	}
-
-	return &DeviceRelationship{
-		Relationship: Relationship{Type: "Relationship"},
-		Object:       device,
-	}
-}
-
 //PointOfInterestRelationship stores information about an entity's relation to a certain PointOfInterest
 type PointOfInterestRelationship struct {
 	Relationship
 	Object string `json:"object"`
-}
-
-//DeviceModelRelationship stores information about a devices' relationship to a DeviceModel
-type DeviceModelRelationship struct {
-	Relationship
-	Object string `json:"object"`
-}
-
-//NewDeviceModelRelationship creates relationship instance to DeviceModelID
-func NewDeviceModelRelationship(deviceModelID string) (*DeviceModelRelationship, error) {
-	const deviceModelIDPrefix = "urn:ngsi-ld:DeviceModel:"
-	if strings.HasPrefix(deviceModelID, deviceModelIDPrefix) == false {
-		return nil, errors.New("DeviceModelID does not have correct prefix " + deviceModelIDPrefix)
-	}
-
-	return &DeviceModelRelationship{
-		Relationship: Relationship{Type: "Relationship"},
-		Object:       deviceModelID,
-	}, nil
 }
 
 type RoadRelationship struct {
