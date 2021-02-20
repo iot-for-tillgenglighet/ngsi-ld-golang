@@ -16,13 +16,17 @@ type ProblemDetails interface {
 	WriteResponse(w http.ResponseWriter)
 }
 
+//ProblemDetailsImpl is an implementation of the ProblemDetails interface
 type ProblemDetailsImpl struct {
 	typ    string
 	title  string
 	detail string
 }
 
-var problemContentType = "application/problem+json"
+const (
+	//ProblemReportContentType as required by https://tools.ietf.org/html/rfc7807
+	ProblemReportContentType string = "application/problem+json"
+)
 
 //BadRequestData reports that the request includes input data which does not meet the requirements of the operation
 type BadRequestData struct {
@@ -93,9 +97,10 @@ func ReportNewInternalError(w http.ResponseWriter, detail string) {
 
 //ContentType returns the ContentType to be used when returning this problem
 func (p *ProblemDetailsImpl) ContentType() string {
-	return problemContentType
+	return ProblemReportContentType
 }
 
+//MarshalJSON is called when a ProblemDetailsImpl instance should be serialized to JSON
 func (p *ProblemDetailsImpl) MarshalJSON() ([]byte, error) {
 	j, err := json.Marshal(struct {
 		Type   string `json:"type"`
@@ -117,10 +122,11 @@ func (p *ProblemDetailsImpl) ResponseCode() int {
 	return http.StatusBadRequest
 }
 
+//WriteResponse writes the contents of this instance to a http.ResponseWriter
 func (p *ProblemDetailsImpl) WriteResponse(w http.ResponseWriter) {
-	w.WriteHeader(p.ResponseCode())
 	w.Header().Add("Content-Type", p.ContentType())
 	w.Header().Add("Content-Language", "en")
+	w.WriteHeader(p.ResponseCode())
 
 	pdbytes, err := json.MarshalIndent(p, "", "  ")
 	if err == nil {

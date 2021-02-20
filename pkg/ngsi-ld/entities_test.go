@@ -12,6 +12,7 @@ import (
 	"testing"
 
 	"github.com/iot-for-tillgenglighet/ngsi-ld-golang/pkg/datamodels/fiware"
+	ngsierrors "github.com/iot-for-tillgenglighet/ngsi-ld-golang/pkg/ngsi-ld/errors"
 	"github.com/iot-for-tillgenglighet/ngsi-ld-golang/pkg/ngsi-ld/types"
 )
 
@@ -78,6 +79,27 @@ func TestCreateEntityUsesCorrectTypeAndID(t *testing.T) {
 
 	if ctxSrc.createdEntity != entityID {
 		t.Error("CreateEntity called with wrong entity ID. ", ctxSrc.createdEntity, " != ", entityID)
+	}
+}
+
+func TestThatProblemsAreReportedWithCorrectContentType(t *testing.T) {
+	byteBuffer, _ := newEntityAsByteBuffer("id")
+	req, _ := http.NewRequest("POST", createURL("/entities"), byteBuffer)
+	w := httptest.NewRecorder()
+
+	NewCreateEntityHandler(NewContextRegistry()).ServeHTTP(w, req)
+
+	response := w.Result()
+	contentTypes := response.Header["Content-Type"]
+
+	if len(contentTypes) != 1 {
+		t.Errorf("Response returned %d content types. Expected 1!", len(contentTypes))
+	} else {
+		contentType := contentTypes[0]
+		expected := ngsierrors.ProblemReportContentType
+		if strings.Compare(contentType, expected) != 0 {
+			t.Errorf("Wrong content type when reporting error. %s is not %s!", contentType, expected)
+		}
 	}
 }
 
