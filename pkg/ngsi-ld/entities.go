@@ -2,6 +2,7 @@ package ngsi
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -131,12 +132,21 @@ func NewCreateEntityHandler(ctxReg ContextRegistry) http.HandlerFunc {
 		request := newRequestWrapper(r)
 
 		entity := &types.BaseEntity{}
-		request.DecodeBodyInto(entity)
+		err := request.DecodeBodyInto(entity)
+		if err != nil {
+			errors.ReportNewInvalidRequest(
+				w,
+				fmt.Sprintf("Unable to decode request payload: %s", err.Error()),
+			)
+		}
 
 		contextSources := ctxReg.GetContextSourcesForEntityType(entity.Type)
 
 		if len(contextSources) == 0 {
-			errors.ReportNewInvalidRequest(w, "No context sources found matching the provided type")
+			errors.ReportNewInvalidRequest(
+				w,
+				fmt.Sprintf("No context sources found matching the provided type %s", entity.Type),
+			)
 			return
 		}
 
