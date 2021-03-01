@@ -2,7 +2,6 @@ package fiware
 
 import (
 	"strings"
-	"time"
 
 	ngsi "github.com/iot-for-tillgenglighet/ngsi-ld-golang/pkg/ngsi-ld/types"
 )
@@ -25,8 +24,7 @@ func NewDevice(id string, value string) *Device {
 	}
 
 	return &Device{
-		Value:                 ngsi.NewTextProperty(value),
-		DateLastValueReported: ngsi.CreateDateTimeProperty(time.Now().UTC().String()),
+		Value: ngsi.NewTextProperty(value),
 		BaseEntity: ngsi.BaseEntity{
 			ID:   id,
 			Type: "Device",
