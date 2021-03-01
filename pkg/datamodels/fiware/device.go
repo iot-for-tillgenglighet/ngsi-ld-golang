@@ -2,6 +2,7 @@ package fiware
 
 import (
 	"strings"
+	"time"
 
 	ngsi "github.com/iot-for-tillgenglighet/ngsi-ld-golang/pkg/ngsi-ld/types"
 )
@@ -10,11 +11,11 @@ import (
 type Device struct {
 	ngsi.BaseEntity
 	Value                 *ngsi.TextProperty       `json:"value"`
+	DateLastValueReported *ngsi.DateTimeProperty   `json:"dateLastValueReported,omitempty"`
 	DateCreated           *ngsi.DateTimeProperty   `json:"dateCreated,omitempty"`
 	DateModified          *ngsi.DateTimeProperty   `json:"dateModified,omitempty"`
 	Location              *ngsi.GeoJSONProperty    `json:"location,omitempty"`
 	RefDeviceModel        *DeviceModelRelationship `json:"refDeviceModel,omitempty"`
-	DateLastValueReported *ngsi.DateTimeProperty   `json:"dateLastValueReported,omitempty"`
 }
 
 //NewDevice creates a new Device from given ID and Value
@@ -24,7 +25,8 @@ func NewDevice(id string, value string) *Device {
 	}
 
 	return &Device{
-		Value: ngsi.NewTextProperty(value),
+		Value:                 ngsi.NewTextProperty(value),
+		DateLastValueReported: ngsi.CreateDateTimeProperty(time.Now().UTC().String()),
 		BaseEntity: ngsi.BaseEntity{
 			ID:   id,
 			Type: "Device",
