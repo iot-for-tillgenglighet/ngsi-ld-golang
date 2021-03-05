@@ -1,6 +1,7 @@
 package diwise
 
 import (
+	"fmt"
 	"strings"
 
 	fiware "github.com/iot-for-tillgenglighet/ngsi-ld-golang/pkg/datamodels/fiware"
@@ -10,15 +11,15 @@ import (
 //RoadSurfaceObserved is a Diwise entity
 type RoadSurfaceObserved struct {
 	ngsi.BaseEntity
-	Position         ngsi.GeoJSONProperty         `json:"position"`
-	SurfaceType      fiware.RoadSurfaceType       `json:"surfaceType"`
-	RefRoadSegmentID ngsi.RoadSegmentRelationship `json:"refRoadSegment"`
+	Position       ngsi.GeoJSONProperty         `json:"position"`
+	SurfaceType    fiware.RoadSurfaceType       `json:"surfaceType"`
+	RefRoadSegment ngsi.MultiObjectRelationship `json:"refRoadSegment,omitempty"`
 }
 
 //NewRoadSurfaceObserved creates a new instance of RoadSurfaceObserved
 func NewRoadSurfaceObserved(id string, surfaceType string, probability float64, latitude float64, longitude float64) *RoadSurfaceObserved {
-	if strings.HasPrefix(id, "urn:ngsi-ld:RoadSurfaceObserved:") == false {
-		id = "urn:ngsi-ld:RoadSurfaceObserved:" + id
+	if strings.HasPrefix(id, RoadSurfaceObservedIDPrefix) == false {
+		id = RoadSurfaceObservedIDPrefix + id
 	}
 
 	return &RoadSurfaceObserved{
@@ -39,4 +40,16 @@ func NewRoadSurfaceObserved(id string, surfaceType string, probability float64, 
 			},
 		},
 	}
+}
+
+//WithRoadSegment creates a reference to a road segment.
+func (rso *RoadSurfaceObserved) WithRoadSegment(segmentID string) (*RoadSurfaceObserved, error) {
+
+	if strings.HasPrefix(segmentID, fiware.RoadSegmentIDPrefix) {
+		rso.RefRoadSegment = ngsi.NewMultiObjectRelationship([]string{segmentID})
+	} else {
+		return nil, fmt.Errorf("Unable to create a RoadSegmentRelationship from invalid segment ID: %s", segmentID)
+	}
+
+	return rso, nil
 }
