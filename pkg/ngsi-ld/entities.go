@@ -81,7 +81,7 @@ func NewQueryEntitiesHandler(ctxReg ContextRegistry) http.HandlerFunc {
 			return
 		}
 
-		w.Header().Add("Content-Type", "application/ld+json")
+		w.Header().Add("Content-Type", "application/ld+json;charset=utf-8")
 		// TODO: Add a RFC 8288 Link header with information about previous and/or next page if they exist
 		w.Write(bytes)
 	})
@@ -205,7 +205,7 @@ func NewRetrieveEntityHandler(ctxReg ContextRegistry) http.HandlerFunc {
 
 		bytes, err := json.Marshal(entity)
 
-		w.Header().Add("Content-Type", "application/ld+json")
+		w.Header().Add("Content-Type", "application/ld+json;charset=utf-8")
 		w.Write(bytes)
 	})
 }
