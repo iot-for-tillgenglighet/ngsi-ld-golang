@@ -7,13 +7,13 @@ import (
 //WaterQualityObserved is intended to represent water quality parameters at a certain water mass (river, lake, sea, etc.) section.
 type WaterQualityObserved struct {
 	ngsi.BaseEntity
-	DateCreated        *ngsi.DateTimeProperty            `json:"dateCreated,omitempty"`
-	DateModified       *ngsi.DateTimeProperty            `json:"dateModified,omitempty"`
-	DateObserved       ngsi.DateTimeProperty             `json:"dateObserved"`
-	Location           ngsi.GeoJSONProperty              `json:"location"`
-	RefDevice          *DeviceRelationship               `json:"refDevice,omitempty"`
-	RefPointOfInterest *ngsi.PointOfInterestRelationship `json:"refPointOfInterest,omitempty"`
-	Temperature        *ngsi.NumberProperty              `json:"temperature,omitempty"`
+	DateCreated        *ngsi.DateTimeProperty         `json:"dateCreated,omitempty"`
+	DateModified       *ngsi.DateTimeProperty         `json:"dateModified,omitempty"`
+	DateObserved       ngsi.DateTimeProperty          `json:"dateObserved"`
+	Location           ngsi.GeoJSONProperty           `json:"location"`
+	RefDevice          *ngsi.SingleObjectRelationship `json:"refDevice,omitempty"`
+	RefPointOfInterest *ngsi.SingleObjectRelationship `json:"refPointOfInterest,omitempty"`
+	Temperature        *ngsi.NumberProperty           `json:"temperature,omitempty"`
 }
 
 //NewWaterQualityObserved creates a new instance of WaterQualityObserved
@@ -25,7 +25,7 @@ func NewWaterQualityObserved(device string, latitude float64, longitude float64,
 		device = "manual"
 	}
 
-	id := "urn:ngsi-ld:WaterQualityObserved:" + device + ":" + observedAt
+	id := WaterQualityObservedIDPrefix + device + ":" + observedAt
 
 	return &WaterQualityObserved{
 		DateObserved: *dateTimeValue,

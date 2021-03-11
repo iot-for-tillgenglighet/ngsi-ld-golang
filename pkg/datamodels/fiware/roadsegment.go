@@ -16,29 +16,29 @@ type RoadSurfaceType struct {
 //RoadSegment is a Fiware entity
 type RoadSegment struct {
 	ngsi.BaseEntity
-	Name            *ngsi.TextProperty       `json:"name"`
-	DateCreated     *ngsi.DateTimeProperty   `json:"dateCreated,omitempty"`
-	DateModified    *ngsi.DateTimeProperty   `json:"dateModified,omitempty"`
-	Location        ngsi.RoadSegmentLocation `json:"location,omitempty"`
-	EndPoint        ngsi.GeoJSONProperty     `json:"endPoint"`
-	StartPoint      ngsi.GeoJSONProperty     `json:"startPoint"`
-	RefRoad         *ngsi.RoadRelationship   `json:"refRoad,omitempty"`
-	TotalLaneNumber *ngsi.NumberProperty     `json:"totalLaneNumber"`
-	SurfaceType     *RoadSurfaceType         `json:"surfaceType,omitempty"`
+	Name            *ngsi.TextProperty             `json:"name"`
+	DateCreated     *ngsi.DateTimeProperty         `json:"dateCreated,omitempty"`
+	DateModified    *ngsi.DateTimeProperty         `json:"dateModified,omitempty"`
+	Location        ngsi.RoadSegmentLocation       `json:"location,omitempty"`
+	EndPoint        ngsi.GeoJSONProperty           `json:"endPoint"`
+	StartPoint      ngsi.GeoJSONProperty           `json:"startPoint"`
+	RefRoad         *ngsi.SingleObjectRelationship `json:"refRoad,omitempty"`
+	TotalLaneNumber *ngsi.NumberProperty           `json:"totalLaneNumber"`
+	SurfaceType     *RoadSurfaceType               `json:"surfaceType,omitempty"`
 }
 
 //NewRoadSegment creates a new instance of RoadSegment
 func NewRoadSegment(id, roadSegmentName, roadID string, coords [][2]float64, modified *time.Time) *RoadSegment {
-	if strings.HasPrefix(id, "urn:ngsi-ld:RoadSegment:") == false {
-		id = "urn:ngsi-ld:RoadSegment:" + id
+	if strings.HasPrefix(id, RoadSegmentIDPrefix) == false {
+		id = RoadSegmentIDPrefix + id
 	}
 
-	if strings.HasPrefix(roadID, "urn:ngsi-ld:Road:") == false {
-		roadID = "urn:ngsi-ld:Road:" + roadID
+	if strings.HasPrefix(roadID, RoadIDPrefix) == false {
+		roadID = RoadIDPrefix + roadID
 	}
 
 	name := ngsi.NewTextProperty(roadSegmentName)
-	refRoad := ngsi.NewRoadRelationship(roadID)
+	refRoad := ngsi.NewSingleObjectRelationship(roadID)
 	startPoint := coords[0]
 	endPoint := coords[len(coords)-1]
 

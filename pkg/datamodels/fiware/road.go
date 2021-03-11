@@ -11,19 +11,19 @@ type Road struct {
 	ngsi.BaseEntity
 	Name           *ngsi.TextProperty           `json:"name"`
 	RoadClass      *ngsi.TextProperty           `json:"roadClass"`
-	RefRoadSegment ngsi.RoadSegmentRelationship `json:"refRoadSegment"`
+	RefRoadSegment ngsi.MultiObjectRelationship `json:"refRoadSegment"`
 }
 
 //NewRoad creates a new instance of Road
 func NewRoad(id string, roadName string, roadClass string, roadSegmentIdentities []string) *Road {
-	if strings.HasPrefix(id, "urn:ngsi-ld:Road:") == false {
-		id = "urn:ngsi-ld:Road:" + id
+	if strings.HasPrefix(id, RoadIDPrefix) == false {
+		id = RoadIDPrefix + id
 	}
 
 	return &Road{
 		Name:           ngsi.NewTextProperty(roadName),
 		RoadClass:      ngsi.NewTextProperty(roadClass),
-		RefRoadSegment: ngsi.NewRoadSegmentRelationship(roadSegmentIdentities),
+		RefRoadSegment: ngsi.NewMultiObjectRelationship(roadSegmentIdentities),
 		BaseEntity: ngsi.BaseEntity{
 			ID:   id,
 			Type: "RoadSegment",

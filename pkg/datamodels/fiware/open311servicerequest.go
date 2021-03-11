@@ -16,7 +16,7 @@ type Open311ServiceRequest struct {
 func NewOpen311ServiceRequest(latitude float64, longitude float64, reportedType int, reportedTimestamp string) *Open311ServiceRequest {
 	dateTimeValue := ngsi.CreateDateTimeProperty(reportedTimestamp)
 
-	id := "urn:ngsi-ld:Open311ServiceRequest:" + reportedTimestamp
+	id := Open311ServiceRequestIDPrefix + reportedTimestamp
 
 	return &Open311ServiceRequest{
 		RequestedDateTime: dateTimeValue,

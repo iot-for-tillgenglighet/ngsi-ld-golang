@@ -123,36 +123,33 @@ type Relationship struct {
 	Type string `json:"type"`
 }
 
-//PointOfInterestRelationship stores information about an entity's relation to a certain PointOfInterest
-type PointOfInterestRelationship struct {
+//SingleObjectRelationship stores information about an entity's relation to a single object
+type SingleObjectRelationship struct {
 	Relationship
 	Object string `json:"object"`
 }
 
-type RoadRelationship struct {
-	Relationship
-	Object string `json:"object"`
-}
-
-//NewRoadRelationship accepts a roadIdentitity as a string and returns a new RoadRelationship
-func NewRoadRelationship(roadIdentity string) *RoadRelationship {
-	return &RoadRelationship{
+//NewSingleObjectRelationship accepts an object ID as a string and returns a new SingleObjectRelationship
+func NewSingleObjectRelationship(object string) *SingleObjectRelationship {
+	return &SingleObjectRelationship{
 		Relationship: Relationship{Type: "Relationship"},
-		Object:       roadIdentity,
+		Object:       object,
 	}
 }
 
-type RoadSegmentRelationship struct {
+//MultiObjectRelationship stores information about an entity's relation to multiple objects
+type MultiObjectRelationship struct {
 	Relationship
 	Object []string `json:"object"`
 }
 
-func NewRoadSegmentRelationship(roadSegmentIdentities []string) RoadSegmentRelationship {
-	p := RoadSegmentRelationship{
+//NewMultiObjectRelationship accepts an array of object ID:s and returns a new MultiObjectRelationship
+func NewMultiObjectRelationship(objects []string) MultiObjectRelationship {
+	p := MultiObjectRelationship{
 		Relationship: Relationship{Type: "Relationship"},
 	}
 
-	p.Object = roadSegmentIdentities
+	p.Object = objects
 
 	return p
 }

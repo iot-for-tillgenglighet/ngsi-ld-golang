@@ -9,11 +9,13 @@ import (
 //Beach is a Fiware entity
 type Beach struct {
 	ngsi.BaseEntity
-	Name         *ngsi.TextProperty     `json:"name,omitempty"`
-	Description  *ngsi.TextProperty     `json:"description"`
-	Location     ngsi.GeoJSONProperty   `json:"location,omitempty"`
-	DateCreated  *ngsi.DateTimeProperty `json:"dateCreated,omitempty"`
-	DateModified *ngsi.DateTimeProperty `json:"dateModified,omitempty"`
+	Name         *ngsi.TextProperty            `json:"name,omitempty"`
+	Description  *ngsi.TextProperty            `json:"description"`
+	Location     ngsi.GeoJSONProperty          `json:"location,omitempty"`
+	RefSeeAlso   *ngsi.MultiObjectRelationship `json:"refSeeAlso,omitempty"`
+	SameAs       *ngsi.TextProperty            `json:"sameAs,omitempty"`
+	DateCreated  *ngsi.DateTimeProperty        `json:"dateCreated,omitempty"`
+	DateModified *ngsi.DateTimeProperty        `json:"dateModified,omitempty"`
 }
 
 //NewBeach creates a new Beach from given ID and name

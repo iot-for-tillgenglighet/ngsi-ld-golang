@@ -7,13 +7,13 @@ import (
 //WeatherObserved is an observation of weather conditions at a certain place and time.
 type WeatherObserved struct {
 	ngsi.BaseEntity
-	DateCreated  *ngsi.DateTimeProperty `json:"dateCreated,omitempty"`
-	DateModified *ngsi.DateTimeProperty `json:"dateModified,omitempty"`
-	DateObserved ngsi.DateTimeProperty  `json:"dateObserved"`
-	Location     ngsi.GeoJSONProperty   `json:"location"`
-	RefDevice    *DeviceRelationship    `json:"refDevice,omitempty"`
-	SnowHeight   *ngsi.NumberProperty   `json:"snowHeight,omitempty"`
-	Temperature  *ngsi.NumberProperty   `json:"temperature,omitempty"`
+	DateCreated  *ngsi.DateTimeProperty         `json:"dateCreated,omitempty"`
+	DateModified *ngsi.DateTimeProperty         `json:"dateModified,omitempty"`
+	DateObserved ngsi.DateTimeProperty          `json:"dateObserved"`
+	Location     ngsi.GeoJSONProperty           `json:"location"`
+	RefDevice    *ngsi.SingleObjectRelationship `json:"refDevice,omitempty"`
+	SnowHeight   *ngsi.NumberProperty           `json:"snowHeight,omitempty"`
+	Temperature  *ngsi.NumberProperty           `json:"temperature,omitempty"`
 }
 
 //NewWeatherObserved creates a new instance of WeatherObserved
@@ -25,7 +25,7 @@ func NewWeatherObserved(device string, latitude float64, longitude float64, obse
 		device = "manual"
 	}
 
-	id := "urn:ngsi-ld:WeatherObserved:" + device + ":" + observedAt
+	id := WeatherObservedIDPrefix + device + ":" + observedAt
 
 	return &WeatherObserved{
 		DateObserved: *dateTimeValue,

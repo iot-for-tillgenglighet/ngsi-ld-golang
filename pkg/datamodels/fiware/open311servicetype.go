@@ -14,7 +14,7 @@ type Open311ServiceType struct {
 //NewOpen311ServiceType creates a new Open311ServiceType
 func NewOpen311ServiceType(label string, reportType string) *Open311ServiceType {
 
-	id := "urn:ngsi-ld:Open311ServiceType:" + label + ":" + reportType
+	id := Open311ServiceTypeIDPrefix + label + ":" + reportType
 
 	return &Open311ServiceType{
 		Description: *ngsi.NewTextProperty(label),

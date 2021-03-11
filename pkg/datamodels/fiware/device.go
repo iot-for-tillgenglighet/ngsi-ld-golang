@@ -9,12 +9,12 @@ import (
 //Device is a Fiware entity
 type Device struct {
 	ngsi.BaseEntity
-	Value                 *ngsi.TextProperty       `json:"value"`
-	DateLastValueReported *ngsi.DateTimeProperty   `json:"dateLastValueReported,omitempty"`
-	DateCreated           *ngsi.DateTimeProperty   `json:"dateCreated,omitempty"`
-	DateModified          *ngsi.DateTimeProperty   `json:"dateModified,omitempty"`
-	Location              *ngsi.GeoJSONProperty    `json:"location,omitempty"`
-	RefDeviceModel        *DeviceModelRelationship `json:"refDeviceModel,omitempty"`
+	Value                 *ngsi.TextProperty             `json:"value"`
+	DateLastValueReported *ngsi.DateTimeProperty         `json:"dateLastValueReported,omitempty"`
+	DateCreated           *ngsi.DateTimeProperty         `json:"dateCreated,omitempty"`
+	DateModified          *ngsi.DateTimeProperty         `json:"dateModified,omitempty"`
+	Location              *ngsi.GeoJSONProperty          `json:"location,omitempty"`
+	RefDeviceModel        *ngsi.SingleObjectRelationship `json:"refDeviceModel,omitempty"`
 }
 
 //NewDevice creates a new Device from given ID and Value
@@ -36,14 +36,8 @@ func NewDevice(id string, value string) *Device {
 	}
 }
 
-//DeviceRelationship stores information about an entity's relation to a certain Device
-type DeviceRelationship struct {
-	ngsi.Relationship
-	Object string `json:"object"`
-}
-
 //CreateDeviceRelationshipFromDevice create a DeviceRelationship from a Device
-func CreateDeviceRelationshipFromDevice(device string) *DeviceRelationship {
+func CreateDeviceRelationshipFromDevice(device string) *ngsi.SingleObjectRelationship {
 	if len(device) == 0 {
 		return nil
 	}
@@ -52,8 +46,5 @@ func CreateDeviceRelationshipFromDevice(device string) *DeviceRelationship {
 		device = DeviceIDPrefix + device
 	}
 
-	return &DeviceRelationship{
-		Relationship: ngsi.Relationship{Type: "Relationship"},
-		Object:       device,
-	}
+	return ngsi.NewSingleObjectRelationship(device)
 }

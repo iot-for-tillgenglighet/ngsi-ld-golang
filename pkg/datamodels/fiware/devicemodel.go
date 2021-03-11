@@ -39,20 +39,12 @@ func NewDeviceModel(id string, categories []string) *DeviceModel {
 	}
 }
 
-//DeviceModelRelationship stores information about a devices' relationship to a DeviceModel
-type DeviceModelRelationship struct {
-	ngsi.Relationship
-	Object string `json:"object"`
-}
-
 //NewDeviceModelRelationship creates relationship instance to DeviceModelID
-func NewDeviceModelRelationship(deviceModelID string) (*DeviceModelRelationship, error) {
+func NewDeviceModelRelationship(deviceModelID string) (*ngsi.SingleObjectRelationship, error) {
 	if strings.HasPrefix(deviceModelID, DeviceModelIDPrefix) == false {
 		return nil, errors.New("DeviceModelID does not have correct prefix " + DeviceModelIDPrefix)
 	}
 
-	return &DeviceModelRelationship{
-		Relationship: ngsi.Relationship{Type: "Relationship"},
-		Object:       deviceModelID,
-	}, nil
+	rel := ngsi.NewSingleObjectRelationship(deviceModelID)
+	return rel, nil
 }
