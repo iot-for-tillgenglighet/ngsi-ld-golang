@@ -35,11 +35,11 @@ func NewRegisterContextSourceHandler(ctxReg ContextRegistry) http.HandlerFunc {
 			return
 		}
 
-		remoteCtxSrc, err := NewRemoteContextSource(reg)
+		remoteCtxSrc, _ := NewRemoteContextSource(reg)
 
 		ctxReg.Register(remoteCtxSrc)
 
-		jsonBytes, err := json.Marshal(remoteCtxSrc)
+		jsonBytes, _ := json.Marshal(remoteCtxSrc)
 
 		w.WriteHeader(http.StatusCreated)
 		w.Header().Add("Content-Type", "application/json")
@@ -98,14 +98,14 @@ func (rcs *remoteContextSource) CreateEntity(typeName, entityID string, r Reques
 	response, err := proxyToRemote(u, req)
 
 	if err != nil {
-		return fmt.Errorf("Attempt to create %s entity failed with status code %d: %s", typeName, response.responseCode, err.Error())
+		return fmt.Errorf("attempt to create %s entity failed with status code %d: %s", typeName, response.responseCode, err.Error())
 	}
 
 	return err
 }
 
 func (rcs *remoteContextSource) GetEntities(query Query, callback QueryEntitiesCallback) error {
-	u, err := url.Parse(rcs.registration.Endpoint())
+	u, _ := url.Parse(rcs.registration.Endpoint())
 	req := query.Request()
 
 	req.URL.Host = u.Host
@@ -162,7 +162,7 @@ func (rcs *remoteContextSource) UpdateEntityAttributes(entityID string, r Reques
 	_, err := proxyToRemote(u, req)
 
 	if err != nil {
-		return fmt.Errorf("Failed to patch entity %s: %s", entityID, err.Error())
+		return fmt.Errorf("failed to patch entity %s: %s", entityID, err.Error())
 	}
 
 	return nil
@@ -181,7 +181,7 @@ func (rcs *remoteContextSource) ProvidesType(typeName string) bool {
 }
 
 func (rcs *remoteContextSource) RetrieveEntity(entityID string, r Request) (Entity, error) {
-	u, err := url.Parse(rcs.registration.Endpoint())
+	u, _ := url.Parse(rcs.registration.Endpoint())
 	req := r.Request()
 
 	req.URL.Host = u.Host
@@ -199,7 +199,7 @@ func (rcs *remoteContextSource) RetrieveEntity(entityID string, r Request) (Enti
 	response, err := proxyToRemote(u, req)
 
 	if err != nil {
-		return nil, fmt.Errorf("Failed to retrieve entity %s: %s", entityID, err.Error())
+		return nil, fmt.Errorf("failed to retrieve entity %s: %s", entityID, err.Error())
 	}
 
 	var entity interface{}
@@ -210,10 +210,13 @@ func (rcs *remoteContextSource) RetrieveEntity(entityID string, r Request) (Enti
 			return entity, nil
 		}
 
-		return nil, fmt.Errorf("Failed to unmarshal retrieved entity %s: %s", entityID, err.Error())
+		return nil, fmt.Errorf(
+			"failed to unmarshal retrieved entity %s from %s: %s",
+			entityID, string(response.bytes), err.Error(),
+		)
 	}
 
-	return nil, fmt.Errorf("Unexpected response code from retrieve entity %s: %d != 200", entityID, response.responseCode)
+	return nil, fmt.Errorf("unexpected response code from retrieve entity %s: %d != 200", entityID, response.responseCode)
 }
 
 func proxyToRemote(u *url.URL, req *http.Request) (remoteResponse, error) {
