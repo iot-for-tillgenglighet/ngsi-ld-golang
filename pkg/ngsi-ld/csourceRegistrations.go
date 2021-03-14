@@ -195,6 +195,8 @@ func (rcs *remoteContextSource) RetrieveEntity(entityID string, r Request) (Enti
 
 	// Change the User-Agent header to something more appropriate
 	req.Header.Add("User-Agent", "ngsi-context-broker/0.1")
+	// We do not want to propagate the Accept-Encoding header to prevent compression
+	req.Header.Del("Accept-Encoding")
 
 	response, err := proxyToRemote(u, req)
 
