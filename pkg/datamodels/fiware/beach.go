@@ -20,7 +20,7 @@ type Beach struct {
 
 //NewBeach creates a new Beach from given ID and name
 func NewBeach(id, name string, lat, lon float64) *Beach {
-	if strings.HasPrefix(id, BeachIDPrefix) == false {
+	if !strings.HasPrefix(id, BeachIDPrefix) {
 		id = BeachIDPrefix + id
 	}
 

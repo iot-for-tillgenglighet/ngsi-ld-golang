@@ -29,11 +29,11 @@ type RoadSegment struct {
 
 //NewRoadSegment creates a new instance of RoadSegment
 func NewRoadSegment(id, roadSegmentName, roadID string, coords [][2]float64, modified *time.Time) *RoadSegment {
-	if strings.HasPrefix(id, RoadSegmentIDPrefix) == false {
+	if !strings.HasPrefix(id, RoadSegmentIDPrefix) {
 		id = RoadSegmentIDPrefix + id
 	}
 
-	if strings.HasPrefix(roadID, RoadIDPrefix) == false {
+	if !strings.HasPrefix(roadID, RoadIDPrefix) {
 		roadID = RoadIDPrefix + roadID
 	}
 

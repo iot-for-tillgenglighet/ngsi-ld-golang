@@ -16,7 +16,7 @@ type Road struct {
 
 //NewRoad creates a new instance of Road
 func NewRoad(id string, roadName string, roadClass string, roadSegmentIdentities []string) *Road {
-	if strings.HasPrefix(id, RoadIDPrefix) == false {
+	if !strings.HasPrefix(id, RoadIDPrefix) {
 		id = RoadIDPrefix + id
 	}
 

@@ -19,7 +19,7 @@ type Device struct {
 
 //NewDevice creates a new Device from given ID and Value
 func NewDevice(id string, value string) *Device {
-	if strings.HasPrefix(id, DeviceIDPrefix) == false {
+	if !strings.HasPrefix(id, DeviceIDPrefix) {
 		id = DeviceIDPrefix + id
 	}
 
@@ -42,7 +42,7 @@ func CreateDeviceRelationshipFromDevice(device string) *ngsi.SingleObjectRelatio
 		return nil
 	}
 
-	if strings.HasPrefix(device, DeviceIDPrefix) == false {
+	if !strings.HasPrefix(device, DeviceIDPrefix) {
 		device = DeviceIDPrefix + device
 	}
 
