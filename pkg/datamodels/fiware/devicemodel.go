@@ -1,7 +1,6 @@
 package fiware
 
 import (
-	"errors"
 	"strings"
 
 	ngsi "github.com/iot-for-tillgenglighet/ngsi-ld-golang/pkg/ngsi-ld/types"
@@ -22,7 +21,7 @@ type DeviceModel struct {
 
 //NewDeviceModel creates a new DeviceModel from given ID and Value
 func NewDeviceModel(id string, categories []string) *DeviceModel {
-	if strings.HasPrefix(id, DeviceModelIDPrefix) == false {
+	if !strings.HasPrefix(id, DeviceModelIDPrefix) {
 		id = DeviceModelIDPrefix + id
 	}
 
@@ -39,10 +38,10 @@ func NewDeviceModel(id string, categories []string) *DeviceModel {
 	}
 }
 
-//NewDeviceModelRelationship creates relationship instance to DeviceModelID
+//NewDeviceModelRelationship creates a single object relationship to a DeviceModelID
 func NewDeviceModelRelationship(deviceModelID string) (*ngsi.SingleObjectRelationship, error) {
-	if strings.HasPrefix(deviceModelID, DeviceModelIDPrefix) == false {
-		return nil, errors.New("DeviceModelID does not have correct prefix " + DeviceModelIDPrefix)
+	if !strings.HasPrefix(deviceModelID, DeviceModelIDPrefix) {
+		deviceModelID = DeviceModelIDPrefix + deviceModelID
 	}
 
 	rel := ngsi.NewSingleObjectRelationship(deviceModelID)
