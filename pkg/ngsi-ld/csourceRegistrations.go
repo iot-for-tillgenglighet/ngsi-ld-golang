@@ -148,7 +148,7 @@ func (rcs *remoteContextSource) GetEntities(query Query, callback QueryEntitiesC
 }
 
 func (rcs *remoteContextSource) UpdateEntityAttributes(entityID string, r Request) error {
-	u, err := url.Parse(rcs.registration.Endpoint())
+	u, _ := url.Parse(rcs.registration.Endpoint())
 	req := r.Request()
 
 	req.URL.Host = u.Host
@@ -167,7 +167,11 @@ func (rcs *remoteContextSource) UpdateEntityAttributes(entityID string, r Reques
 	proxy := httputil.NewSingleHostReverseProxy(u)
 	proxy.ServeHTTP(response, req)
 
-	return err
+	if response.responseCode != http.StatusNoContent {
+		return fmt.Errorf("Failed to patch entity %s [%d]", entityID, response.responseCode)
+	}
+
+	return nil
 }
 
 func (rcs *remoteContextSource) ProvidesAttribute(attributeName string) bool {
