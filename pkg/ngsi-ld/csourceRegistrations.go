@@ -95,15 +95,13 @@ func (rcs *remoteContextSource) CreateEntity(typeName, entityID string, r Reques
 	// Change the User-Agent header to something more appropriate
 	req.Header.Add("User-Agent", "ngsi-context-broker/0.1")
 
-	response := &remoteResponse{}
-	proxy := httputil.NewSingleHostReverseProxy(u)
-	proxy.ServeHTTP(response, req)
+	response, err := proxyToRemote(u, req)
 
-	if response.responseCode != http.StatusCreated {
-		return fmt.Errorf("Attempt to create %s entity failed with status code %d", typeName, response.responseCode)
+	if err != nil {
+		return fmt.Errorf("Attempt to create %s entity failed with status code %d: %s", typeName, response.responseCode, err.Error())
 	}
 
-	return nil
+	return err
 }
 
 func (rcs *remoteContextSource) GetEntities(query Query, callback QueryEntitiesCallback) error {
@@ -125,9 +123,7 @@ func (rcs *remoteContextSource) GetEntities(query Query, callback QueryEntitiesC
 	// We do not want to propagate the Accept-Encoding header to prevent compression
 	req.Header.Del("Accept-Encoding")
 
-	response := &remoteResponse{}
-	proxy := httputil.NewSingleHostReverseProxy(u)
-	proxy.ServeHTTP(response, req)
+	response, err := proxyToRemote(u, req)
 
 	var unmarshaledResponse []interface{}
 
@@ -163,12 +159,10 @@ func (rcs *remoteContextSource) UpdateEntityAttributes(entityID string, r Reques
 	// Change the User-Agent header to something more appropriate
 	req.Header.Add("User-Agent", "ngsi-context-broker/0.1")
 
-	response := &remoteResponse{}
-	proxy := httputil.NewSingleHostReverseProxy(u)
-	proxy.ServeHTTP(response, req)
+	_, err := proxyToRemote(u, req)
 
-	if response.responseCode != http.StatusNoContent {
-		return fmt.Errorf("Failed to patch entity %s [%d]", entityID, response.responseCode)
+	if err != nil {
+		return fmt.Errorf("Failed to patch entity %s: %s", entityID, err.Error())
 	}
 
 	return nil
@@ -202,9 +196,11 @@ func (rcs *remoteContextSource) RetrieveEntity(entityID string, r Request) (Enti
 	// Change the User-Agent header to something more appropriate
 	req.Header.Add("User-Agent", "ngsi-context-broker/0.1")
 
-	response := &remoteResponse{}
-	proxy := httputil.NewSingleHostReverseProxy(u)
-	proxy.ServeHTTP(response, req)
+	response, err := proxyToRemote(u, req)
+
+	if err != nil {
+		return nil, fmt.Errorf("Failed to retrieve entity %s: %s", entityID, err.Error())
+	}
 
 	var entity interface{}
 
@@ -213,9 +209,29 @@ func (rcs *remoteContextSource) RetrieveEntity(entityID string, r Request) (Enti
 		if err == nil {
 			return entity, nil
 		}
+
+		return nil, fmt.Errorf("Failed to unmarshal retrieved entity %s: %s", entityID, err.Error())
 	}
 
-	return nil, fmt.Errorf("Failed to retrieve entity %s [%d]", entityID, response.responseCode)
+	return nil, fmt.Errorf("Unexpected response code from retrieve entity %s: %d != 200", entityID, response.responseCode)
+}
+
+func proxyToRemote(u *url.URL, req *http.Request) (remoteResponse, error) {
+	response := remoteResponse{}
+	proxy := httputil.NewSingleHostReverseProxy(u)
+	proxy.ServeHTTP(&response, req)
+
+	var err error
+
+	if response.responseCode >= http.StatusBadRequest {
+		if len(response.bytes) > 0 {
+			err = fmt.Errorf("%s", string(response.bytes))
+		} else {
+			err = fmt.Errorf("received %d response with empty body", response.responseCode)
+		}
+	}
+
+	return response, err
 }
 
 type ctxSrcReg struct {
