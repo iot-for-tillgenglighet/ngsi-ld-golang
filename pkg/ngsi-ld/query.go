@@ -85,7 +85,7 @@ func newQueryFromParameters(req *http.Request, types []string, attributes []stri
 	if limitparam != "" {
 		limit, err := strconv.ParseInt(limitparam, 10, 64)
 		if err != nil {
-			return nil, fmt.Errorf("Unable to parse limit parameter %s into an int value", limitparam)
+			return nil, fmt.Errorf("unable to parse limit parameter %s into an int value", limitparam)
 		}
 		if limit > 0 {
 			qw.limit = uint64(limit)
@@ -96,7 +96,7 @@ func newQueryFromParameters(req *http.Request, types []string, attributes []stri
 	if offsetparam != "" {
 		offset, err := strconv.ParseInt(offsetparam, 10, 64)
 		if err != nil {
-			return nil, fmt.Errorf("Unable to parse offset parameter %s into an int value", offsetparam)
+			return nil, fmt.Errorf("unable to parse offset parameter %s into an int value", offsetparam)
 		}
 		if offset >= 0 {
 			qw.offset = uint64(offset)
@@ -124,12 +124,12 @@ func newGeoQueryFromHTTPRequest(georel string, req *http.Request) (*GeoQuery, er
 		geoQuery := &GeoQuery{Geometry: "Point", GeoRel: GeoSpatialRelationNearPoint}
 
 		if req.URL.Query().Get("geometry") != "Point" {
-			return nil, errors.New("The geospatial relationship near is only defined for the geometry type Point")
+			return nil, errors.New("the geospatial relationship near is only defined for the geometry type Point")
 		}
 
 		distanceString := req.URL.Query().Get("maxDistance")
-		if len(distanceString) < 2 || strings.HasPrefix(distanceString, "=") == false {
-			return nil, errors.New("Required parameter maxDistance missing or invalid")
+		if len(distanceString) < 2 || !strings.HasPrefix(distanceString, "=") {
+			return nil, errors.New("required parameter maxDistance missing or invalid")
 		}
 
 		distanceString = distanceString[1:]
@@ -159,7 +159,7 @@ func newGeoQueryFromHTTPRequest(georel string, req *http.Request) (*GeoQuery, er
 		geoQuery := &GeoQuery{Geometry: "Polygon", GeoRel: GeoSpatialRelationWithinRect}
 
 		if req.URL.Query().Get("geometry") != "Polygon" {
-			return nil, errors.New("The geospatial relationship \"within\" is only defined for the geometry type Polygon")
+			return nil, errors.New("the geospatial relationship \"within\" is only defined for the geometry type Polygon")
 		}
 
 		geoQuery.Coordinates, err = parseGeometryCoordinates(req.URL.Query().Get("coordinates"))
@@ -168,13 +168,13 @@ func newGeoQueryFromHTTPRequest(georel string, req *http.Request) (*GeoQuery, er
 		}
 
 		if len(geoQuery.Coordinates) != 6 {
-			return nil, fmt.Errorf("The geospatial relationship \"within\" is only implemented for the Polygon type with five positions describing a bounding rect, but %d positions were received", len(geoQuery.Coordinates)/2)
+			return nil, fmt.Errorf("the geospatial relationship \"within\" is only implemented for the Polygon type with five positions describing a bounding rect, but %d positions were received", len(geoQuery.Coordinates)/2)
 		}
 
 		return geoQuery, nil
 	}
 
-	return nil, errors.New("Only the geo-spatial relationships \"near\" and \"within\" are supported at this time")
+	return nil, errors.New("only the geo-spatial relationships \"near\" and \"within\" are supported at this time")
 }
 
 func parseGeometryCoordinates(coordparameter string) ([]float64, error) {
@@ -213,14 +213,14 @@ func parseGeometryCoordinates(coordparameter string) ([]float64, error) {
 
 		if b == '[' {
 			if state != prelon {
-				return nil, fmt.Errorf("Unexpected [ at position %d in %s", i, coordparameter)
+				return nil, fmt.Errorf("unexpected [ at position %d in %s", i, coordparameter)
 			}
 			pdepth++
 		} else if b == ']' {
 			pdepth--
 
 			if pdepth < 0 {
-				return nil, fmt.Errorf("Unexpected ] at position %d in %s", i, coordparameter)
+				return nil, fmt.Errorf("unexpected ] at position %d in %s", i, coordparameter)
 			}
 
 			if state == latint || state == latdec {
@@ -265,12 +265,12 @@ func parseGeometryCoordinates(coordparameter string) ([]float64, error) {
 				state = prelat
 			}
 		} else {
-			return nil, fmt.Errorf("Invalid byte '%c' found at position %d in %s", b, i, coordparameter)
+			return nil, fmt.Errorf("invalid byte '%c' found at position %d in %s", b, i, coordparameter)
 		}
 	}
 
 	if pdepth > 0 {
-		return nil, fmt.Errorf("Missing ] at end of coordinates array %s", coordparameter)
+		return nil, fmt.Errorf("missing ] at end of coordinates array %s", coordparameter)
 	}
 
 	return coordinates, nil

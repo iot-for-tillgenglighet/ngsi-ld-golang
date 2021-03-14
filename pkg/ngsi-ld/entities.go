@@ -203,7 +203,7 @@ func NewRetrieveEntityHandler(ctxReg ContextRegistry) http.HandlerFunc {
 			return
 		}
 
-		bytes, err := json.Marshal(entity)
+		bytes, _ := json.Marshal(entity)
 
 		w.Header().Add("Content-Type", "application/ld+json;charset=utf-8")
 		w.Write(bytes)
