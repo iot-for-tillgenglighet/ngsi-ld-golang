@@ -14,7 +14,7 @@ type RoadSurfaceObserved struct {
 	Position       ngsi.GeoJSONProperty          `json:"position"`
 	SurfaceType    fiware.RoadSurfaceType        `json:"surfaceType"`
 	RefRoadSegment *ngsi.MultiObjectRelationship `json:"refRoadSegment,omitempty"`
-	DateObserved   ngsi.DateTimeProperty         `json:"dateObserved"`
+	DateObserved   *ngsi.DateTimeProperty        `json:"dateObserved,omitempty"`
 }
 
 //NewRoadSurfaceObserved creates a new instance of RoadSurfaceObserved
