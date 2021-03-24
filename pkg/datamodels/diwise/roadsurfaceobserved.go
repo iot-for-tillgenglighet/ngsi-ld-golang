@@ -11,7 +11,7 @@ import (
 //RoadSurfaceObserved is a Diwise entity
 type RoadSurfaceObserved struct {
 	ngsi.BaseEntity
-	Position       ngsi.GeoJSONProperty          `json:"position"`
+	Location       ngsi.GeoJSONProperty          `json:"location"`
 	SurfaceType    fiware.RoadSurfaceType        `json:"surfaceType"`
 	RefRoadSegment *ngsi.MultiObjectRelationship `json:"refRoadSegment,omitempty"`
 	DateObserved   *ngsi.DateTimeProperty        `json:"dateObserved,omitempty"`
@@ -24,7 +24,7 @@ func NewRoadSurfaceObserved(id string, surfaceType string, probability float64, 
 	}
 
 	return &RoadSurfaceObserved{
-		Position: ngsi.CreateGeoJSONPropertyFromWGS84(latitude, longitude),
+		Location: ngsi.CreateGeoJSONPropertyFromWGS84(longitude, latitude),
 		SurfaceType: fiware.RoadSurfaceType{
 			TextProperty: ngsi.TextProperty{
 				Property: ngsi.Property{Type: "Property"},
