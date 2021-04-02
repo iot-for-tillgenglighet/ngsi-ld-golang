@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/iot-for-tillgenglighet/ngsi-ld-golang/pkg/ngsi-ld/errors"
+	"github.com/iot-for-tillgenglighet/ngsi-ld-golang/pkg/ngsi-ld/geojson"
 	"github.com/iot-for-tillgenglighet/ngsi-ld-golang/pkg/ngsi-ld/types"
 )
 
@@ -21,6 +22,22 @@ type QueryEntitiesCallback func(entity Entity) error
 //NewQueryEntitiesHandler handles GET requests for NGSI entitites
 func NewQueryEntitiesHandler(ctxReg ContextRegistry) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Default entity converter doesn't actually convert anything
+		entityConverter := func(e interface{}) interface{} { return e }
+
+		responseContentType := "application/ld+json;charset=utf-8"
+		var geoJSONFeatureCollection *geojson.GeoJSONFeatureCollection
+
+		// Check Accepts to find out what kind of data the client wants
+		for _, acceptableType := range r.Header["Accept"] {
+			if acceptableType == "application/geo+json" {
+				options := r.URL.Query().Get("options")
+				geoJSONFeatureCollection = geojson.NewGeoJSONFeatureCollection([]geojson.GeoJSONFeature{}, true)
+				entityConverter = geojson.NewEntityConverter("location", options == "keyValues", geoJSONFeatureCollection)
+				responseContentType = "application/geo+json;charset=utf-8"
+			}
+		}
+
 		entityTypeNames := r.URL.Query().Get("type")
 		attributeNames := r.URL.Query().Get("attrs")
 
@@ -57,7 +74,7 @@ func NewQueryEntitiesHandler(ctxReg ContextRegistry) http.HandlerFunc {
 		for _, source := range contextSources {
 			err = source.GetEntities(query, func(entity Entity) error {
 				if entityCount < entityMaxCount {
-					entities = append(entities, entity)
+					entities = append(entities, entityConverter(entity))
 					entityCount++
 				}
 				return nil
@@ -75,13 +92,20 @@ func NewQueryEntitiesHandler(ctxReg ContextRegistry) http.HandlerFunc {
 			return
 		}
 
-		bytes, err := json.MarshalIndent(entities, "", "  ")
+		var bytes []byte
+
+		if geoJSONFeatureCollection != nil {
+			bytes, err = json.MarshalIndent(geoJSONFeatureCollection, "", "  ")
+		} else {
+			bytes, err = json.MarshalIndent(entities, "", "  ")
+		}
+
 		if err != nil {
 			errors.ReportNewInternalError(w, "Failed to encode response.")
 			return
 		}
 
-		w.Header().Add("Content-Type", "application/ld+json;charset=utf-8")
+		w.Header().Add("Content-Type", responseContentType)
 		// TODO: Add a RFC 8288 Link header with information about previous and/or next page if they exist
 		w.Write(bytes)
 	})
