@@ -24,7 +24,7 @@ func NewRoadSurfaceObserved(id string, surfaceType string, probability float64, 
 	}
 
 	return &RoadSurfaceObserved{
-		Location: ngsi.CreateGeoJSONPropertyFromWGS84(longitude, latitude),
+		Location: *ngsi.CreateGeoJSONPropertyFromWGS84(longitude, latitude),
 		SurfaceType: fiware.RoadSurfaceType{
 			TextProperty: ngsi.TextProperty{
 				Property: ngsi.Property{Type: "Property"},

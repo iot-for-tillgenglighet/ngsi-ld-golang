@@ -44,8 +44,8 @@ func NewRoadSegment(id, roadSegmentName, roadID string, coords [][2]float64, mod
 
 	rs := &RoadSegment{
 		Name:            name,
-		EndPoint:        ngsi.CreateGeoJSONPropertyFromWGS84(endPoint[0], endPoint[1]),
-		StartPoint:      ngsi.CreateGeoJSONPropertyFromWGS84(startPoint[0], startPoint[1]),
+		EndPoint:        *ngsi.CreateGeoJSONPropertyFromWGS84(endPoint[0], endPoint[1]),
+		StartPoint:      *ngsi.CreateGeoJSONPropertyFromWGS84(startPoint[0], startPoint[1]),
 		RefRoad:         refRoad,
 		Location:        ngsi.NewRoadSegmentLocation(coords),
 		TotalLaneNumber: ngsi.NewNumberPropertyFromInt(1),

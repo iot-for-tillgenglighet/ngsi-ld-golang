@@ -29,7 +29,7 @@ func NewWeatherObserved(device string, latitude float64, longitude float64, obse
 
 	return &WeatherObserved{
 		DateObserved: *dateTimeValue,
-		Location:     ngsi.CreateGeoJSONPropertyFromWGS84(longitude, latitude),
+		Location:     *ngsi.CreateGeoJSONPropertyFromWGS84(longitude, latitude),
 		RefDevice:    refDevice,
 		BaseEntity: ngsi.BaseEntity{
 			ID:   id,
