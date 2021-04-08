@@ -4,6 +4,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/iot-for-tillgenglighet/ngsi-ld-golang/pkg/ngsi-ld/geojson"
 	ngsi "github.com/iot-for-tillgenglighet/ngsi-ld-golang/pkg/ngsi-ld/types"
 )
 
@@ -20,8 +21,8 @@ type RoadSegment struct {
 	DateCreated     *ngsi.DateTimeProperty         `json:"dateCreated,omitempty"`
 	DateModified    *ngsi.DateTimeProperty         `json:"dateModified,omitempty"`
 	Location        ngsi.RoadSegmentLocation       `json:"location,omitempty"`
-	EndPoint        ngsi.GeoJSONProperty           `json:"endPoint"`
-	StartPoint      ngsi.GeoJSONProperty           `json:"startPoint"`
+	EndPoint        geojson.GeoJSONProperty        `json:"endPoint"`
+	StartPoint      geojson.GeoJSONProperty        `json:"startPoint"`
 	RefRoad         *ngsi.SingleObjectRelationship `json:"refRoad,omitempty"`
 	TotalLaneNumber *ngsi.NumberProperty           `json:"totalLaneNumber"`
 	SurfaceType     *RoadSurfaceType               `json:"surfaceType,omitempty"`
@@ -44,8 +45,8 @@ func NewRoadSegment(id, roadSegmentName, roadID string, coords [][2]float64, mod
 
 	rs := &RoadSegment{
 		Name:            name,
-		EndPoint:        *ngsi.CreateGeoJSONPropertyFromWGS84(endPoint[0], endPoint[1]),
-		StartPoint:      *ngsi.CreateGeoJSONPropertyFromWGS84(startPoint[0], startPoint[1]),
+		EndPoint:        *geojson.CreateGeoJSONPropertyFromWGS84(endPoint[0], endPoint[1]),
+		StartPoint:      *geojson.CreateGeoJSONPropertyFromWGS84(startPoint[0], startPoint[1]),
 		RefRoad:         refRoad,
 		Location:        ngsi.NewRoadSegmentLocation(coords),
 		TotalLaneNumber: ngsi.NewNumberPropertyFromInt(1),

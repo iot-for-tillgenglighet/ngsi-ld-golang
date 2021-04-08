@@ -2,8 +2,6 @@ package types
 
 import (
 	"strconv"
-
-	"github.com/iot-for-tillgenglighet/ngsi-ld-golang/pkg/ngsi-ld/geojson"
 )
 
 //BaseEntity contains the required base properties an Entity must have
@@ -37,74 +35,6 @@ func CreateDateTimeProperty(value string) *DateTimeProperty {
 	dtp.Value.Value = value
 
 	return dtp
-}
-
-//GeoJSONPropertyPoint is used as the value object for a GeoJSONPropertyPoint
-type GeoJSONPropertyPoint struct {
-	Type        string     `json:"type"`
-	Coordinates [2]float64 `json:"coordinates"`
-}
-
-func (gjpp *GeoJSONPropertyPoint) GeoPropertyType() string {
-	return gjpp.Type
-}
-
-func (gjpp *GeoJSONPropertyPoint) GeoPropertyValue() geojson.GeoJSONGeometry {
-	return gjpp
-}
-
-//GeoJSONPropertyMultiPolygon is used as the value object for a GeoJSONPropertyPoint
-type GeoJSONPropertyMultiPolygon struct {
-	Type        string          `json:"type"`
-	Coordinates [][][][]float64 `json:"coordinates"`
-}
-
-func (gjpmp *GeoJSONPropertyMultiPolygon) GeoPropertyType() string {
-	return gjpmp.Type
-}
-
-func (gjpmp *GeoJSONPropertyMultiPolygon) GeoPropertyValue() geojson.GeoJSONGeometry {
-	return gjpmp
-}
-
-//GeoJSONProperty is used to encapsulate different GeoJSONGeometry types
-type GeoJSONProperty struct {
-	Property
-	Value geojson.GeoJSONGeometry `json:"value"`
-}
-
-func (gjp *GeoJSONProperty) GeoPropertyType() string {
-	return gjp.Value.GeoPropertyType()
-}
-
-func (gjp *GeoJSONProperty) GeoPropertyValue() geojson.GeoJSONGeometry {
-	return gjp.Value
-}
-
-//CreateGeoJSONPropertyFromWGS84 creates a GeoJSONProperty from a WGS84 coordinate
-func CreateGeoJSONPropertyFromWGS84(longitude, latitude float64) *GeoJSONProperty {
-	p := &GeoJSONProperty{
-		Property: Property{Type: "GeoProperty"},
-		Value: &GeoJSONPropertyPoint{
-			Type:        "Point",
-			Coordinates: [2]float64{longitude, latitude},
-		},
-	}
-
-	return p
-}
-
-//CreateGeoJSONPropertyFromMultiPolygon creates a GeoJSONProperty from an array of polygon coordinate arrays
-func CreateGeoJSONPropertyFromMultiPolygon(coordinates [][][][]float64) *GeoJSONProperty {
-	p := &GeoJSONProperty{
-		Property: Property{Type: "GeoProperty"},
-		Value: &GeoJSONPropertyMultiPolygon{
-			Type:        "MultiPolygon",
-			Coordinates: coordinates,
-		},
-	}
-
-	return p
 }
 
 //NumberProperty holds a float64 Value

@@ -21,7 +21,7 @@ type Beach struct {
 }
 
 func (b Beach) ToGeoJSONFeature(propertyName string, simplified bool) (geojson.GeoJSONFeature, error) {
-	g := geojson.NewGeoJSONFeature(b.ID, b.Type, b.Location)
+	g := geojson.NewGeoJSONFeature(b.ID, b.Type, b.Location.GeoPropertyValue())
 
 	if simplified {
 		g.SetProperty("name", b.Name.Value)

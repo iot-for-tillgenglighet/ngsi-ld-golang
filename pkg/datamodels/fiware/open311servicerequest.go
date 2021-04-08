@@ -1,15 +1,16 @@
 package fiware
 
 import (
+	"github.com/iot-for-tillgenglighet/ngsi-ld-golang/pkg/ngsi-ld/geojson"
 	ngsi "github.com/iot-for-tillgenglighet/ngsi-ld-golang/pkg/ngsi-ld/types"
 )
 
 //Open311ServiceRequest is a ...
 type Open311ServiceRequest struct {
 	ngsi.BaseEntity
-	RequestedDateTime *ngsi.DateTimeProperty `json:"requested_datetime,omitempty"`
-	Location          ngsi.GeoJSONProperty   `json:"location"`
-	ServiceCode       ngsi.NumberProperty    `json:"service_code"`
+	RequestedDateTime *ngsi.DateTimeProperty  `json:"requested_datetime,omitempty"`
+	Location          geojson.GeoJSONProperty `json:"location"`
+	ServiceCode       ngsi.NumberProperty     `json:"service_code"`
 }
 
 //NewOpen311ServiceRequest creates a new service request
@@ -20,7 +21,7 @@ func NewOpen311ServiceRequest(latitude float64, longitude float64, reportedType 
 
 	return &Open311ServiceRequest{
 		RequestedDateTime: dateTimeValue,
-		Location:          *ngsi.CreateGeoJSONPropertyFromWGS84(longitude, latitude),
+		Location:          *geojson.CreateGeoJSONPropertyFromWGS84(longitude, latitude),
 		ServiceCode:       *ngsi.NewNumberPropertyFromInt(reportedType),
 		BaseEntity: ngsi.BaseEntity{
 			ID:   id,

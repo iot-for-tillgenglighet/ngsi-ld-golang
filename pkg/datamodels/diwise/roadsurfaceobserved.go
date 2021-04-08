@@ -5,13 +5,14 @@ import (
 	"strings"
 
 	fiware "github.com/iot-for-tillgenglighet/ngsi-ld-golang/pkg/datamodels/fiware"
+	"github.com/iot-for-tillgenglighet/ngsi-ld-golang/pkg/ngsi-ld/geojson"
 	ngsi "github.com/iot-for-tillgenglighet/ngsi-ld-golang/pkg/ngsi-ld/types"
 )
 
 //RoadSurfaceObserved is a Diwise entity
 type RoadSurfaceObserved struct {
 	ngsi.BaseEntity
-	Location       ngsi.GeoJSONProperty          `json:"location"`
+	Location       geojson.GeoJSONProperty       `json:"location"`
 	SurfaceType    fiware.RoadSurfaceType        `json:"surfaceType"`
 	RefRoadSegment *ngsi.MultiObjectRelationship `json:"refRoadSegment,omitempty"`
 	DateObserved   *ngsi.DateTimeProperty        `json:"dateObserved,omitempty"`
@@ -24,7 +25,7 @@ func NewRoadSurfaceObserved(id string, surfaceType string, probability float64, 
 	}
 
 	return &RoadSurfaceObserved{
-		Location: *ngsi.CreateGeoJSONPropertyFromWGS84(longitude, latitude),
+		Location: *geojson.CreateGeoJSONPropertyFromWGS84(longitude, latitude),
 		SurfaceType: fiware.RoadSurfaceType{
 			TextProperty: ngsi.TextProperty{
 				Property: ngsi.Property{Type: "Property"},

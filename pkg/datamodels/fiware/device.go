@@ -3,6 +3,7 @@ package fiware
 import (
 	"strings"
 
+	"github.com/iot-for-tillgenglighet/ngsi-ld-golang/pkg/ngsi-ld/geojson"
 	ngsi "github.com/iot-for-tillgenglighet/ngsi-ld-golang/pkg/ngsi-ld/types"
 )
 
@@ -13,7 +14,7 @@ type Device struct {
 	DateLastValueReported *ngsi.DateTimeProperty         `json:"dateLastValueReported,omitempty"`
 	DateCreated           *ngsi.DateTimeProperty         `json:"dateCreated,omitempty"`
 	DateModified          *ngsi.DateTimeProperty         `json:"dateModified,omitempty"`
-	Location              *ngsi.GeoJSONProperty          `json:"location,omitempty"`
+	Location              *geojson.GeoJSONProperty       `json:"location,omitempty"`
 	RefDeviceModel        *ngsi.SingleObjectRelationship `json:"refDeviceModel,omitempty"`
 }
 

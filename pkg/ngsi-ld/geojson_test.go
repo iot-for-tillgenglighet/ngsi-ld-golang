@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/iot-for-tillgenglighet/ngsi-ld-golang/pkg/datamodels/fiware"
+	"github.com/iot-for-tillgenglighet/ngsi-ld-golang/pkg/ngsi-ld/geojson"
 	"github.com/iot-for-tillgenglighet/ngsi-ld-golang/pkg/ngsi-ld/types"
 )
 
@@ -18,7 +19,7 @@ func TestGetEntitiesAsGeoJSON(t *testing.T) {
 	contextRegistry := NewContextRegistry()
 	contextSource := newMockedContextSource("Beach", "temperature")
 
-	location := types.CreateGeoJSONPropertyFromMultiPolygon([][][][]float64{})
+	location := geojson.CreateGeoJSONPropertyFromMultiPolygon([][][][]float64{})
 	b1 := fiware.NewBeach("omaha", "Omaha Beach", location).WithDescription("This is a nice beach!")
 	b1.WaterTemperature = types.NewNumberProperty(7.2)
 
@@ -46,7 +47,7 @@ func TestGetEntitiesAsSimplifiedGeoJSON(t *testing.T) {
 	contextRegistry := NewContextRegistry()
 	contextSource := newMockedContextSource("Beach", "temperature")
 
-	location := types.CreateGeoJSONPropertyFromMultiPolygon([][][][]float64{})
+	location := geojson.CreateGeoJSONPropertyFromMultiPolygon([][][][]float64{})
 	b1 := fiware.NewBeach("omaha", "Omaha Beach", location).WithDescription("This is a nice beach!")
 	b1.WaterTemperature = types.NewNumberProperty(7.2)
 

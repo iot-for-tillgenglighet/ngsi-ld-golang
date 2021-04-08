@@ -1,6 +1,7 @@
 package fiware
 
 import (
+	"github.com/iot-for-tillgenglighet/ngsi-ld-golang/pkg/ngsi-ld/geojson"
 	ngsi "github.com/iot-for-tillgenglighet/ngsi-ld-golang/pkg/ngsi-ld/types"
 )
 
@@ -10,7 +11,7 @@ type WaterQualityObserved struct {
 	DateCreated        *ngsi.DateTimeProperty         `json:"dateCreated,omitempty"`
 	DateModified       *ngsi.DateTimeProperty         `json:"dateModified,omitempty"`
 	DateObserved       ngsi.DateTimeProperty          `json:"dateObserved"`
-	Location           ngsi.GeoJSONProperty           `json:"location"`
+	Location           geojson.GeoJSONProperty        `json:"location"`
 	RefDevice          *ngsi.SingleObjectRelationship `json:"refDevice,omitempty"`
 	RefPointOfInterest *ngsi.SingleObjectRelationship `json:"refPointOfInterest,omitempty"`
 	Temperature        *ngsi.NumberProperty           `json:"temperature,omitempty"`
@@ -29,7 +30,7 @@ func NewWaterQualityObserved(device string, latitude float64, longitude float64,
 
 	return &WaterQualityObserved{
 		DateObserved: *dateTimeValue,
-		Location:     *ngsi.CreateGeoJSONPropertyFromWGS84(longitude, latitude),
+		Location:     *geojson.CreateGeoJSONPropertyFromWGS84(longitude, latitude),
 		RefDevice:    refDevice,
 		BaseEntity: ngsi.BaseEntity{
 			ID:   id,
