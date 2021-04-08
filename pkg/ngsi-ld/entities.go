@@ -30,11 +30,11 @@ func NewQueryEntitiesHandler(ctxReg ContextRegistry) http.HandlerFunc {
 
 		// Check Accepts to find out what kind of data the client wants
 		for _, acceptableType := range r.Header["Accept"] {
-			if acceptableType == "application/geo+json" {
+			if strings.HasPrefix(acceptableType, geojson.ContentType) {
 				options := r.URL.Query().Get("options")
 				geoJSONFeatureCollection = geojson.NewGeoJSONFeatureCollection([]geojson.GeoJSONFeature{}, true)
 				entityConverter = geojson.NewEntityConverter("location", options == "keyValues", geoJSONFeatureCollection)
-				responseContentType = "application/geo+json;charset=utf-8"
+				responseContentType = geojson.ContentTypeWithCharset
 			}
 		}
 

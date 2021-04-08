@@ -8,9 +8,11 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"regexp"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/iot-for-tillgenglighet/ngsi-ld-golang/pkg/ngsi-ld/errors"
+	"github.com/iot-for-tillgenglighet/ngsi-ld-golang/pkg/ngsi-ld/geojson"
 )
 
 //CsourceRegistration is a wrapper for information about a registered context source
@@ -58,6 +60,11 @@ func (rr *remoteResponse) Header() http.Header {
 		rr.headers = make(http.Header)
 	}
 	return rr.headers
+}
+
+func (rr *remoteResponse) MatchesContentType(contentType string) bool {
+	responseType := rr.Header()["Content-Type"][0]
+	return strings.HasPrefix(responseType, contentType)
 }
 
 func (rr *remoteResponse) Write(b []byte) (int, error) {
@@ -125,17 +132,22 @@ func (rcs *remoteContextSource) GetEntities(query Query, callback QueryEntitiesC
 
 	response, err := proxyToRemote(u, req)
 
-	var unmarshaledResponse []interface{}
-
 	// If the response code is 200 we can just unmarshal the payload
-	// and iterate over the array to pass the individual entitites
-	// to the supplied callback. This will of course fail if the response
-	// payload is not an array, but that is an assignment for another day...
+	// and pass the individual entitites to the supplied callback.
+	// We need to check of the payload is GeoJSON or not though.
 	if response.responseCode == http.StatusOK {
-		err = json.Unmarshal(response.bytes, &unmarshaledResponse)
-		if err == nil {
-			for _, e := range unmarshaledResponse {
-				callback(e)
+
+		if response.MatchesContentType(geojson.ContentType) {
+			err = geojson.UnpackGeoJSONToCallback(response.bytes, func(f geojson.GeoJSONFeature) error {
+				return callback(f)
+			})
+		} else {
+			var unmarshaledResponse []interface{}
+			err = json.Unmarshal(response.bytes, &unmarshaledResponse)
+			if err == nil {
+				for _, e := range unmarshaledResponse {
+					callback(e)
+				}
 			}
 		}
 	}
