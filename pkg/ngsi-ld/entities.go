@@ -28,7 +28,7 @@ func NewQueryEntitiesHandler(ctxReg ContextRegistry) http.HandlerFunc {
 		responseContentType := "application/ld+json;charset=utf-8"
 		var geoJSONFeatureCollection *geojson.GeoJSONFeatureCollection
 
-		// Check Accepts to find out what kind of data the client wants
+		// Check Accept to find out what kind of data the client wants
 		for _, acceptableType := range r.Header["Accept"] {
 			if strings.HasPrefix(acceptableType, geojson.ContentType) {
 				options := r.URL.Query().Get("options")
@@ -87,7 +87,7 @@ func NewQueryEntitiesHandler(ctxReg ContextRegistry) http.HandlerFunc {
 		if err != nil {
 			errors.ReportNewInternalError(
 				w,
-				"An internal error was encountered when trying to get entities from the context source.",
+				"An internal error was encountered when trying to get entities from the context source: "+err.Error(),
 			)
 			return
 		}
