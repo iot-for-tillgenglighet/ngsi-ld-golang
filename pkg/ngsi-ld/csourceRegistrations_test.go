@@ -132,22 +132,12 @@ func TestThatGeoJSONResponsesAreProperlyPropagated(t *testing.T) {
 	NewRegisterContextSourceHandler(ctxRegistry).ServeHTTP(w, req)
 
 	// Send a GET request for entities of type Beach (that are handled by the "remote" source)
-	req, _ = http.NewRequest("GET", "https://localhost/ngsi-ld/v1/entities?type=Beach", nil)
-	query, _ := newQueryFromParameters(req, []string{"Beach"}, []string{""}, "")
-	sources := ctxRegistry.GetContextSourcesForQuery(query)
+	req, _ = http.NewRequest("GET", "https://localhost/ngsi-ld/v1/entities?type=Beach&options=keyValues", nil)
+	req.Header["Accept"] = []string{"application/geo+json"}
+	w = httptest.NewRecorder()
+	NewQueryEntitiesHandler(ctxRegistry).ServeHTTP(w, req)
 
-	numEntities := 0
-
-	for _, src := range sources {
-		src.GetEntities(query, func(entity Entity) error {
-			numEntities++
-			bytes, _ := json.Marshal(entity)
-			fmt.Printf("entity: %s", string(bytes))
-			return nil
-		})
-	}
-
-	if numEntities == 0 {
+	if w.Code != http.StatusOK {
 		t.Error("Failed to get entities from remote endpoint.")
 	}
 }
