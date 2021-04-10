@@ -90,8 +90,8 @@ func (gjfc *GeoJSONFeatureCollection) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
-	for _, f := range collection.Features {
-		gjfc.Features = append(gjfc.Features, &f)
+	for idx := range collection.Features {
+		gjfc.Features = append(gjfc.Features, &collection.Features[idx])
 	}
 
 	return nil
