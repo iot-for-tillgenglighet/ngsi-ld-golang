@@ -11,7 +11,7 @@ import (
 	"github.com/iot-for-tillgenglighet/ngsi-ld-golang/pkg/ngsi-ld/types"
 )
 
-func TestGetEntitiesAsGeoJSON(t *testing.T) {
+func TestGetBeachAsGeoJSON(t *testing.T) {
 	req, _ := http.NewRequest("GET", createURL("/entitites?type=Beach"), nil)
 	req.Header["Accept"] = []string{"application/geo+json"}
 
@@ -26,6 +26,32 @@ func TestGetEntitiesAsGeoJSON(t *testing.T) {
 	contextSource.entities = append(
 		contextSource.entities,
 		b1,
+	)
+
+	contextRegistry.Register(contextSource)
+
+	NewQueryEntitiesHandler(contextRegistry).ServeHTTP(w, req)
+
+	fmt.Printf("Got response: %s\n", w.Body)
+
+	if w.Code != 200 {
+		t.Error("Failed to get geojson data")
+	}
+}
+
+func TestGetWaterQualityObservedAsGeoJSON(t *testing.T) {
+	req, _ := http.NewRequest("GET", createURL("/entitites?type=WaterQualityObserved&options=keyValues"), nil)
+	req.Header["Accept"] = []string{"application/geo+json"}
+
+	w := httptest.NewRecorder()
+	contextRegistry := NewContextRegistry()
+	contextSource := newMockedContextSource("WaterQualityObserved", "temperature")
+
+	wqo1 := fiware.NewWaterQualityObserved("badtempsensor", 64.2789, 17.2961, "2021-04-22T17:23:41Z")
+
+	contextSource.entities = append(
+		contextSource.entities,
+		wqo1,
 	)
 
 	contextRegistry.Register(contextSource)

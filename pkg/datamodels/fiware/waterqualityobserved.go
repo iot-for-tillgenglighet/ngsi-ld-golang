@@ -42,3 +42,33 @@ func NewWaterQualityObserved(device string, latitude float64, longitude float64,
 		},
 	}
 }
+
+func (wqo WaterQualityObserved) ToGeoJSONFeature(propertyName string, simplified bool) (geojson.GeoJSONFeature, error) {
+	g := geojson.NewGeoJSONFeature(wqo.ID, wqo.Type, wqo.Location.GeoPropertyValue())
+
+	if simplified {
+		g.SetProperty(propertyName, wqo.Location.GeoPropertyValue())
+		g.SetProperty("dateObserved", wqo.DateObserved.Value.Value)
+
+		if wqo.Temperature != nil {
+			g.SetProperty("temperature", wqo.Temperature.Value)
+		}
+
+		if wqo.RefDevice != nil {
+			g.SetProperty("refDevice", wqo.RefDevice.Object)
+		}
+
+		if wqo.RefPointOfInterest != nil {
+			g.SetProperty("refPointOfInterest", wqo.RefPointOfInterest.Object)
+		}
+	} else {
+		g.SetProperty(propertyName, wqo.Location)
+		g.SetProperty("dateObserved", wqo.DateObserved)
+
+		g.SetProperty("temperature", wqo.Temperature)
+		g.SetProperty("refDevice", wqo.RefDevice)
+		g.SetProperty("refPointOfInterest", wqo.RefPointOfInterest)
+	}
+
+	return g, nil
+}
