@@ -42,3 +42,33 @@ func NewWeatherObserved(device string, latitude float64, longitude float64, obse
 		},
 	}
 }
+
+func (wo WeatherObserved) ToGeoJSONFeature(propertyName string, simplified bool) (geojson.GeoJSONFeature, error) {
+	g := geojson.NewGeoJSONFeature(wo.ID, wo.Type, wo.Location.GeoPropertyValue())
+
+	if simplified {
+		g.SetProperty(propertyName, wo.Location.GeoPropertyValue())
+		g.SetProperty("dateObserved", wo.DateObserved.Value.Value)
+
+		if wo.SnowHeight != nil {
+			g.SetProperty("snowHeight", wo.SnowHeight.Value)
+		}
+
+		if wo.Temperature != nil {
+			g.SetProperty("temperature", wo.Temperature.Value)
+		}
+
+		if wo.RefDevice != nil {
+			g.SetProperty("refDevice", wo.RefDevice.Object)
+		}
+	} else {
+		g.SetProperty(propertyName, wo.Location)
+		g.SetProperty("dateObserved", wo.DateObserved)
+
+		g.SetProperty("snowHeight", wo.SnowHeight)
+		g.SetProperty("temperature", wo.Temperature)
+		g.SetProperty("refDevice", wo.RefDevice)
+	}
+
+	return g, nil
+}
