@@ -232,6 +232,25 @@ func (gjp *GeoJSONProperty) GeoPropertyValue() GeoJSONGeometry {
 	return gjp.Value
 }
 
+func CreateGeoJSONPropertyFromJSON(data []byte) *GeoJSONProperty {
+	tmp := struct {
+		Property
+		Value geoJSONGeometryImpl `json:"value"`
+	}{}
+
+	err := json.Unmarshal(data, &tmp)
+	if err != nil {
+		return nil
+	}
+
+	p := &GeoJSONProperty{
+		Property: tmp.Property,
+		Value:    tmp.Value.Geometry,
+	}
+
+	return p
+}
+
 //CreateGeoJSONPropertyFromWGS84 creates a GeoJSONProperty from a WGS84 coordinate
 func CreateGeoJSONPropertyFromWGS84(longitude, latitude float64) *GeoJSONProperty {
 	p := &GeoJSONProperty{
