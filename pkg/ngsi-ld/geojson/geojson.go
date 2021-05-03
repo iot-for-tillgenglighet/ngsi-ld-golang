@@ -231,8 +231,7 @@ func (gjpmp *GeoJSONPropertyMultiPolygon) GetLongLatAsPoint() [2]float64 {
 //GeoJSONProperty is used to encapsulate different GeoJSONGeometry types
 type GeoJSONProperty struct {
 	Property
-	Value       GeoJSONGeometry `json:"value"`
-	Coordinates [2]float64      `json:"coordinates"`
+	Value GeoJSONGeometry `json:"value"`
 }
 
 func (gjp *GeoJSONProperty) GeoPropertyType() string {
@@ -244,7 +243,7 @@ func (gjp *GeoJSONProperty) GeoPropertyValue() GeoJSONGeometry {
 }
 
 func (gjp *GeoJSONProperty) GetLongLatAsPoint() [2]float64 {
-	return gjp.Coordinates
+	return gjp.Value.GetLongLatAsPoint()
 }
 
 //CreateGeoJSONPropertyFromWGS84 creates a GeoJSONProperty from a WGS84 coordinate

@@ -39,6 +39,30 @@ func TestGetBeachAsGeoJSON(t *testing.T) {
 	}
 }
 
+// Write two unit tests, one for a GeoPropertyPoint and one for GeoPropertyMultiPolygon, make sure they can both return a single point of coordinates.
+
+func TestGetLongLatForGeoPropertyPoint(t *testing.T) {
+	location := geojson.CreateGeoJSONPropertyFromWGS84(65.2789, 17.2961)
+
+	beach := fiware.NewBeach("beach", "Beach Beach", location).WithDescription("A very beachy beach.")
+	fmt.Print(beach.Location.GetLongLatAsPoint())
+}
+
+func TestGetLongLatForGeoPropertyMultiPolygon(t *testing.T) {
+	poly := [][][][]float64{}
+	row1 := [][][]float64{}
+	row2 := [][]float64{}
+	row3 := []float64{65.2789, 17.2961}
+	row2 = append(row2, row3)
+	row1 = append(row1, row2)
+	poly = append(poly, row1)
+
+	location := geojson.CreateGeoJSONPropertyFromMultiPolygon(poly)
+
+	beach := fiware.NewBeach("beach", "Beach Beach", location).WithDescription("A very beachy beach.")
+	fmt.Print(beach.Location.GetLongLatAsPoint())
+}
+
 func TestGetWaterQualityObservedAsGeoJSON(t *testing.T) {
 	req, _ := http.NewRequest("GET", createURL("/entitites?type=WaterQualityObserved&options=keyValues"), nil)
 	req.Header["Accept"] = []string{"application/geo+json"}
