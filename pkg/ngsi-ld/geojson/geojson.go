@@ -21,7 +21,7 @@ type GeoJSONFeature interface {
 type GeoJSONGeometry interface {
 	GeoPropertyType() string
 	GeoPropertyValue() GeoJSONGeometry
-	GetLongLatAsPoint() [2]float64
+	GetAsPoint() GeoJSONPropertyPoint
 }
 
 type geoJSONGeometryImpl struct {
@@ -205,8 +205,12 @@ func (gjpp *GeoJSONPropertyPoint) GeoPropertyValue() GeoJSONGeometry {
 	return gjpp
 }
 
-func (gjpp *GeoJSONPropertyPoint) GetLongLatAsPoint() [2]float64 {
-	return gjpp.Coordinates
+func (gjpp *GeoJSONPropertyPoint) GetAsPoint() GeoJSONPropertyPoint {
+	// Return a copy of this point to prevent mutation
+	return GeoJSONPropertyPoint{
+		Type:        gjpp.Type,
+		Coordinates: [2]float64{gjpp.Coordinates[0], gjpp.Coordinates[1]},
+	}
 }
 
 //GeoJSONPropertyMultiPolygon is used as the value object for a GeoJSONPropertyPoint
@@ -223,9 +227,11 @@ func (gjpmp *GeoJSONPropertyMultiPolygon) GeoPropertyValue() GeoJSONGeometry {
 	return gjpmp
 }
 
-func (gjpmp *GeoJSONPropertyMultiPolygon) GetLongLatAsPoint() [2]float64 {
-	longlat := [2]float64{gjpmp.Coordinates[0][0][0][0], gjpmp.Coordinates[0][0][0][1]}
-	return longlat
+func (gjpmp *GeoJSONPropertyMultiPolygon) GetAsPoint() GeoJSONPropertyPoint {
+	return GeoJSONPropertyPoint{
+		Type:        "Point",
+		Coordinates: [2]float64{gjpmp.Coordinates[0][0][0][0], gjpmp.Coordinates[0][0][0][1]},
+	}
 }
 
 //GeoJSONProperty is used to encapsulate different GeoJSONGeometry types
@@ -242,8 +248,27 @@ func (gjp *GeoJSONProperty) GeoPropertyValue() GeoJSONGeometry {
 	return gjp.Value
 }
 
-func (gjp *GeoJSONProperty) GetLongLatAsPoint() [2]float64 {
-	return gjp.Value.GetLongLatAsPoint()
+func (gjp *GeoJSONProperty) GetAsPoint() GeoJSONPropertyPoint {
+	return gjp.Value.GetAsPoint()
+}
+
+func CreateGeoJSONPropertyFromJSON(data []byte) *GeoJSONProperty {
+	tmp := struct {
+		Property
+		Value geoJSONGeometryImpl `json:"value"`
+	}{}
+
+	err := json.Unmarshal(data, &tmp)
+	if err != nil {
+		return nil
+	}
+
+	p := &GeoJSONProperty{
+		Property: tmp.Property,
+		Value:    tmp.Value.Geometry,
+	}
+
+	return p
 }
 
 //CreateGeoJSONPropertyFromWGS84 creates a GeoJSONProperty from a WGS84 coordinate

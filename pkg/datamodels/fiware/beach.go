@@ -1,6 +1,8 @@
 package fiware
 
 import (
+	"bytes"
+	"encoding/json"
 	"strings"
 
 	"github.com/iot-for-tillgenglighet/ngsi-ld-golang/pkg/ngsi-ld/geojson"
@@ -13,6 +15,18 @@ type Beach struct {
 	Name             *ngsi.TextProperty            `json:"name,omitempty"`
 	Description      *ngsi.TextProperty            `json:"description"`
 	Location         geojson.GeoJSONGeometry       `json:"location,omitempty"`
+	RefSeeAlso       *ngsi.MultiObjectRelationship `json:"refSeeAlso,omitempty"`
+	SameAs           *ngsi.TextProperty            `json:"sameAs,omitempty"`
+	WaterTemperature *ngsi.NumberProperty          `json:"waterTemperature,omitempty"`
+	DateCreated      *ngsi.DateTimeProperty        `json:"dateCreated,omitempty"`
+	DateModified     *ngsi.DateTimeProperty        `json:"dateModified,omitempty"`
+}
+
+type beachDTO struct {
+	ngsi.BaseEntity
+	Name             *ngsi.TextProperty            `json:"name,omitempty"`
+	Description      *ngsi.TextProperty            `json:"description"`
+	Location         json.RawMessage               `json:"location,omitempty"`
 	RefSeeAlso       *ngsi.MultiObjectRelationship `json:"refSeeAlso,omitempty"`
 	SameAs           *ngsi.TextProperty            `json:"sameAs,omitempty"`
 	WaterTemperature *ngsi.NumberProperty          `json:"waterTemperature,omitempty"`
@@ -79,4 +93,28 @@ func NewBeach(id, name string, location geojson.GeoJSONGeometry) *Beach {
 func (b *Beach) WithDescription(description string) *Beach {
 	b.Description = ngsi.NewTextProperty(description)
 	return b
+}
+
+func (b *Beach) UnmarshalJSON(data []byte) error {
+	dto := &beachDTO{}
+	err := json.NewDecoder(bytes.NewReader(data)).Decode(dto)
+
+	if err == nil {
+		b.ID = dto.ID
+		b.Type = dto.Type
+		b.Name = dto.Name
+		b.Description = dto.Description
+
+		b.DateCreated = dto.DateCreated
+		b.DateModified = dto.DateModified
+		b.RefSeeAlso = dto.RefSeeAlso
+		b.SameAs = dto.SameAs
+		b.WaterTemperature = dto.WaterTemperature
+
+		b.Context = dto.Context
+
+		b.Location = geojson.CreateGeoJSONPropertyFromJSON(dto.Location)
+	}
+
+	return err
 }

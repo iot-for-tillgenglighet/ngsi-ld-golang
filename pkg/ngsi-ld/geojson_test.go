@@ -45,7 +45,7 @@ func TestGetLongLatForGeoPropertyPoint(t *testing.T) {
 	location := geojson.CreateGeoJSONPropertyFromWGS84(65.2789, 17.2961)
 
 	beach := fiware.NewBeach("beach", "Beach Beach", location).WithDescription("A very beachy beach.")
-	fmt.Print(beach.Location.GetLongLatAsPoint())
+	fmt.Print(beach.Location.GetAsPoint())
 }
 
 func TestGetLongLatForGeoPropertyMultiPolygon(t *testing.T) {
@@ -60,7 +60,7 @@ func TestGetLongLatForGeoPropertyMultiPolygon(t *testing.T) {
 	location := geojson.CreateGeoJSONPropertyFromMultiPolygon(poly)
 
 	beach := fiware.NewBeach("beach", "Beach Beach", location).WithDescription("A very beachy beach.")
-	fmt.Print(beach.Location.GetLongLatAsPoint())
+	fmt.Print(beach.Location.GetAsPoint())
 }
 
 func TestGetWaterQualityObservedAsGeoJSON(t *testing.T) {
