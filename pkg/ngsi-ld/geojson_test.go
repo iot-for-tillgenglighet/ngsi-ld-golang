@@ -39,8 +39,6 @@ func TestGetBeachAsGeoJSON(t *testing.T) {
 	}
 }
 
-// Write two unit tests, one for a GeoPropertyPoint and one for GeoPropertyMultiPolygon, make sure they can both return a single point of coordinates.
-
 func TestGetLongLatForGeoPropertyPoint(t *testing.T) {
 	location := geojson.CreateGeoJSONPropertyFromWGS84(17.2961, 65.2789)
 
