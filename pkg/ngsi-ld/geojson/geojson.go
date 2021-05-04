@@ -21,6 +21,7 @@ type GeoJSONFeature interface {
 type GeoJSONGeometry interface {
 	GeoPropertyType() string
 	GeoPropertyValue() GeoJSONGeometry
+	GetAsPoint() GeoJSONPropertyPoint
 }
 
 type geoJSONGeometryImpl struct {
@@ -204,6 +205,14 @@ func (gjpp *GeoJSONPropertyPoint) GeoPropertyValue() GeoJSONGeometry {
 	return gjpp
 }
 
+func (gjpp *GeoJSONPropertyPoint) GetAsPoint() GeoJSONPropertyPoint {
+	// Return a copy of this point to prevent mutation
+	return GeoJSONPropertyPoint{
+		Type:        gjpp.Type,
+		Coordinates: [2]float64{gjpp.Coordinates[0], gjpp.Coordinates[1]},
+	}
+}
+
 //GeoJSONPropertyMultiPolygon is used as the value object for a GeoJSONPropertyPoint
 type GeoJSONPropertyMultiPolygon struct {
 	Type        string          `json:"type"`
@@ -218,6 +227,13 @@ func (gjpmp *GeoJSONPropertyMultiPolygon) GeoPropertyValue() GeoJSONGeometry {
 	return gjpmp
 }
 
+func (gjpmp *GeoJSONPropertyMultiPolygon) GetAsPoint() GeoJSONPropertyPoint {
+	return GeoJSONPropertyPoint{
+		Type:        "Point",
+		Coordinates: [2]float64{gjpmp.Coordinates[0][0][0][0], gjpmp.Coordinates[0][0][0][1]},
+	}
+}
+
 //GeoJSONProperty is used to encapsulate different GeoJSONGeometry types
 type GeoJSONProperty struct {
 	Property
@@ -230,6 +246,10 @@ func (gjp *GeoJSONProperty) GeoPropertyType() string {
 
 func (gjp *GeoJSONProperty) GeoPropertyValue() GeoJSONGeometry {
 	return gjp.Value
+}
+
+func (gjp *GeoJSONProperty) GetAsPoint() GeoJSONPropertyPoint {
+	return gjp.Value.GetAsPoint()
 }
 
 func CreateGeoJSONPropertyFromJSON(data []byte) *GeoJSONProperty {
