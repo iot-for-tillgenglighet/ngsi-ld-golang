@@ -1,6 +1,9 @@
 package fiware
 
 import (
+	"bytes"
+	"encoding/json"
+
 	"github.com/iot-for-tillgenglighet/ngsi-ld-golang/pkg/ngsi-ld/geojson"
 	ngsi "github.com/iot-for-tillgenglighet/ngsi-ld-golang/pkg/ngsi-ld/types"
 )
@@ -14,6 +17,17 @@ type WaterQualityObserved struct {
 	Location           geojson.GeoJSONProperty        `json:"location"`
 	RefDevice          *ngsi.SingleObjectRelationship `json:"refDevice,omitempty"`
 	RefPointOfInterest *ngsi.SingleObjectRelationship `json:"refPointOfInterest,omitempty"`
+	Temperature        *ngsi.NumberProperty           `json:"temperature,omitempty"`
+}
+
+type waterQualityDTO struct {
+	ngsi.BaseEntity
+	DateCreated        *ngsi.DateTimeProperty         `json:"dateCreated,omitempty"`
+	DateModified       *ngsi.DateTimeProperty         `json:"dateModified,omitempty"`
+	DateObserved       ngsi.DateTimeProperty          `json:"dateObserved"`
+	Location           json.RawMessage                `json:"location"`
+	RefDevice          *ngsi.SingleObjectRelationship `json:"refDevice,omitempty"`
+	RefPointOfInterest *ngsi.SingleObjectRelationship `json:"refPointOfInterested,omitempty"`
 	Temperature        *ngsi.NumberProperty           `json:"temperature,omitempty"`
 }
 
@@ -71,4 +85,28 @@ func (wqo WaterQualityObserved) ToGeoJSONFeature(propertyName string, simplified
 	}
 
 	return g, nil
+}
+
+func (wqo *WaterQualityObserved) UnmarshalJSON(data []byte) error {
+	dto := &waterQualityDTO{}
+	err := json.NewDecoder(bytes.NewReader(data)).Decode(dto)
+
+	if err == nil {
+		wqo.ID = dto.ID
+		wqo.Type = dto.Type
+
+		wqo.DateCreated = dto.DateCreated
+		wqo.DateModified = dto.DateModified
+		wqo.DateObserved = dto.DateObserved
+		wqo.RefDevice = dto.RefDevice
+		wqo.RefPointOfInterest = dto.RefPointOfInterest
+		wqo.Temperature = dto.Temperature
+
+		wqo.Context = dto.Context
+
+		wqo.Location = *geojson.CreateGeoJSONPropertyFromJSON(dto.Location)
+
+	}
+
+	return err
 }
