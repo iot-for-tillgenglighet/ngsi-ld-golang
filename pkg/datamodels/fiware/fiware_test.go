@@ -44,3 +44,15 @@ func TestDeviceModel(t *testing.T) {
 
 	// test devicemodel categories are as expected
 }
+
+func TestTrafficFlowObserved(t *testing.T) {
+	id := TrafficFlowObservedIDPrefix + "trafficFlowObservedID"
+	location := [2]float64{1.0, 1.0}
+	ts := time.Now().String()
+
+	tfo := NewTrafficFlowObserved(id, location[0], location[1], ts, 1)
+	if tfo == nil {
+		t.Error("Expectation failed. TrafficFlowObserved is empty")
+	}
+
+}
