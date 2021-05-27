@@ -10,12 +10,15 @@ import (
 //TrafficFlowObserved is a Fiware entity
 type TrafficFlowObserved struct {
 	ngsi.BaseEntity
-	DateObserved   *ngsi.DateTimeProperty         `json:"dateObserved,omitempty"`
-	DateCreated    *ngsi.DateTimeProperty         `json:"dateCreated,omitempty"`
-	DateModified   *ngsi.DateTimeProperty         `json:"dateModified,omitempty"`
-	Location       geojson.GeoJSONProperty        `json:"location,omitempty"`
-	LaneID         *ngsi.NumberProperty           `json:"laneID,omitempty"`
-	RefRoadSegment *ngsi.SingleObjectRelationship `json:"refRoadSegment,omitempty"`
+	DateObserved        *ngsi.DateTimeProperty         `json:"dateObserved,omitempty"`
+	DateCreated         *ngsi.DateTimeProperty         `json:"dateCreated,omitempty"`
+	DateModified        *ngsi.DateTimeProperty         `json:"dateModified,omitempty"`
+	DateObservedTo      *ngsi.DateTimeProperty         `json:"dateObservedTo,omitempty"`
+	DateObservedFrom    *ngsi.DateTimeProperty         `json:"dateObservedFrom,omitempty"`
+	Location            geojson.GeoJSONProperty        `json:"location,omitempty"`
+	LaneID              *ngsi.NumberProperty           `json:"laneID,omitempty"`
+	AverageVehicleSpeed *ngsi.NumberProperty           `json:"averageVehicleSpeed,omitempty"`
+	RefRoadSegment      *ngsi.SingleObjectRelationship `json:"refRoadSegment,omitempty"`
 }
 
 //NewTrafficFlowObserved creates a new TrafficFlowObserved from given ID
